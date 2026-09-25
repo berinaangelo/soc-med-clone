@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy settings — mockup (Phase 2 preview)</title>
+
+<!-- Phase 2 preview, see content-visibility-preview.md — NOT committed, not being built now. Same
+     "separate file" convention as the other previews (direct-messages-preview.md, comments-
+     preview.md, search-preview.md): a wholly new page, not an edit of an existing one, since no
+     Settings/privacy screen has ever existed in the KOS to edit.
+
+     Scope: the two account-level enum fields on User from content-visibility-preview.md —
+     posts_visibility (buildable today, shown fully interactive, defaults to `public` per the
+     decided MVP-preserving default) and comments_visibility (shown but disabled, since Comments
+     itself is still a parked cut — see comments-preview.md — there is nothing real for this
+     control to govern yet). This is deliberately NOT folded into edit-profile.html: profile-
+     editing.md scoped that screen to exactly name/bio/profile_picture, nothing else.
+
+     New component this file introduces: a radio-card selector (first of its kind in the KOS).
+     Applies iconography.md's Signal Weight rule as-is rather than inventing a new one — selected
+     option's icon sits in a solid --primary chip, unselected options stay outline-only, no chip.
+     "Friends" reuses the exact two-person glyph already spoken for by Directory/nav; "Only me"
+     introduces the KOS's first lock icon; "Public" introduces the first globe icon.
+
+     God moment check (mockup-guardrails.md): none of god-moments.md's 5 entries — this is
+     supporting infrastructure (privacy control), same allowance already used for messages.html.
+
+     Left open, not this pass (one-screen-at-a-time, per mockup-guardrails.md): no link into this
+     page has been back-ported into profile.html or edit-profile.html yet — entry-point wiring is
+     a follow-up, same convention comments-preview.md used for its own open items. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 display, Inter 400 body. No IBM Plex Mono
+     — this screen has no handles/timestamps, same call as edit-profile.html. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — identical tokens to every other mockup. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13;
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display { font-family: 'Sora', sans-serif; }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  a,
+  button,
+  input {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a, button, input { transition: none; }
+  }
+
+  /* Radio-card component — new to this mockup. Native radio input (real form semantics), just
+     given accent-color so its own dot matches the palette instead of the browser default. */
+  .visibility-option input[type="radio"] {
+    accent-color: var(--primary);
+  }
+
+  .visibility-option {
+    border: 1px solid var(--border);
+  }
+
+  /* Selected state: thicker primary border (same at-rest/state contrast the rest of the KOS uses
+     for current-tab/followed/unread, just expressed as a border here since there's no chip on the
+     card itself, only on its icon). */
+  .visibility-option:has(input:checked) {
+    border: 2px solid var(--primary);
+    padding: 15px; /* compensate the extra 1px border so the card doesn't shift size on select */
+  }
+
+  /* Icon chip — Signal Weight rule (iconography.md): outline at rest, solid --primary chip only
+     for state. Here "state" is "this option is selected." */
+  .visibility-option .option-icon {
+    color: var(--text);
+    background: transparent;
+  }
+
+  .visibility-option:has(input:checked) .option-icon {
+    color: var(--on-fill);
+    background: var(--primary);
+  }
+
+  /* Disabled group (comments — Comments itself doesn't exist yet). Grayed, inert, no hover/select
+     affordance at all, so it reads as "not available" rather than "broken." */
+  .visibility-option-disabled {
+    border: 1px solid var(--border);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail — same shell as edit-profile.html, always logged-in here (this screen
+         requires login + ownership, same reasoning as edit-profile.html/profile-editing.md). -->
+    <aside class="w-20 shrink-0 sticky top-0 h-screen flex flex-col items-center py-6 gap-2" style="border-right: 1px solid var(--border); background: var(--background);">
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <a href="feed.html" title="Feed" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+        <a href="directory.html" title="Directory" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+        <a href="notifications.html" title="Notifications" class="relative flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+        </a>
+        <!-- Friend requests — new (friend-requests-preview.md), back-ported across every page
+             mockup carrying this rail. Person + checkmark, not Directory's two-person glyph. -->
+        <a href="friend-requests.html" title="Friend requests" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M15 11.5l2 2 4-4.5" />
+          </svg>
+        </a>
+        <a href="messages.html" title="Messages" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+          </svg>
+        </a>
+      </nav>
+
+      <!-- Avatar carries the "current section" ring, same treatment edit-profile.html uses — this
+           screen is reached from the account/profile area, not one of the four rail destinations. -->
+      <a href="profile.html" title="Your profile" aria-current="page" class="mt-auto mb-2 shrink-0 rounded-full p-0.5" style="background: var(--primary);">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-semibold" style="background: var(--secondary); color: var(--on-fill);">YK</span>
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <main class="max-w-lg mx-auto px-6 py-10">
+        <div class="flex items-center justify-between gap-4 mb-2">
+          <h1 class="font-display text-2xl font-semibold">Privacy settings</h1>
+          <a href="profile.html" class="text-sm font-medium" style="color: var(--muted);">Cancel</a>
+        </div>
+
+        <!-- Preview banner — same convention as search.html/edit-profile-photo-upload.html: makes
+             the parked/not-committed status visible on the screen itself. -->
+        <p class="text-xs mb-6" style="color: var(--muted);">
+          Preview — not committed yet, see
+          <span class="font-medium" style="color: var(--secondary);">content-visibility-preview.md</span>.
+          Default stays "Public" for every account until someone opens this screen and changes it.
+        </p>
+
+        <form class="rounded-2xl p-6" style="background: var(--surface); border: 1px solid var(--border);" novalidate>
+          <div class="flex flex-col gap-8">
+
+            <!-- Posts visibility — fully interactive, public selected by default. -->
+            <fieldset>
+              <legend class="text-sm font-medium mb-3">Who can see your posts?</legend>
+              <div class="flex flex-col gap-3">
+
+                <label class="visibility-option flex items-start gap-3 rounded-xl p-4 cursor-pointer" style="padding: 16px;">
+                  <input type="radio" name="posts_visibility" value="public" checked class="mt-1 w-4 h-4 shrink-0" />
+                  <span class="option-icon flex items-center justify-center w-9 h-9 rounded-full shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                      <path d="M2 12h20" />
+                    </svg>
+                  </span>
+                  <span class="flex flex-col gap-0.5">
+                    <span class="font-display text-sm font-semibold">Public</span>
+                    <span class="text-sm" style="color: var(--muted);">Anyone can see your posts, logged in or not.</span>
+                  </span>
+                </label>
+
+                <label class="visibility-option flex items-start gap-3 rounded-xl p-4 cursor-pointer" style="padding: 16px;">
+                  <input type="radio" name="posts_visibility" value="friends" class="mt-1 w-4 h-4 shrink-0" />
+                  <span class="option-icon flex items-center justify-center w-9 h-9 rounded-full shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  </span>
+                  <span class="flex flex-col gap-0.5">
+                    <span class="font-display text-sm font-semibold">Friends</span>
+                    <span class="text-sm" style="color: var(--muted);">Only people you follow back — you have to follow each other.</span>
+                  </span>
+                </label>
+
+                <label class="visibility-option flex items-start gap-3 rounded-xl p-4 cursor-pointer" style="padding: 16px;">
+                  <input type="radio" name="posts_visibility" value="only_me" class="mt-1 w-4 h-4 shrink-0" />
+                  <span class="option-icon flex items-center justify-center w-9 h-9 rounded-full shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </span>
+                  <span class="flex flex-col gap-0.5">
+                    <span class="font-display text-sm font-semibold">Only me</span>
+                    <span class="text-sm" style="color: var(--muted);">Visible to just you — no one else can see your posts.</span>
+                  </span>
+                </label>
+
+              </div>
+            </fieldset>
+
+            <!-- Comments visibility — same shape, disabled: Comments itself doesn't exist yet, so
+                 there's nothing real for this control to govern. Grayed + inert, with a plain-
+                 language reason instead of just looking broken (grandma test, mockup-guardrails.md). -->
+            <fieldset>
+              <legend class="text-sm font-medium mb-3">Who can see your comments?</legend>
+              <div class="flex flex-col gap-3">
+
+                <label class="visibility-option-disabled flex items-start gap-3 rounded-xl p-4">
+                  <input type="radio" name="comments_visibility" value="public" checked disabled class="mt-1 w-4 h-4 shrink-0" />
+                  <span class="flex items-center justify-center w-9 h-9 rounded-full shrink-0" style="color: var(--text);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                      <path d="M2 12h20" />
+                    </svg>
+                  </span>
+                  <span class="flex flex-col gap-0.5">
+                    <span class="font-display text-sm font-semibold">Public</span>
+                    <span class="text-sm" style="color: var(--muted);">Anyone can see your comments, logged in or not.</span>
+                  </span>
+                </label>
+
+                <label class="visibility-option-disabled flex items-start gap-3 rounded-xl p-4">
+                  <input type="radio" name="comments_visibility" value="friends" disabled class="mt-1 w-4 h-4 shrink-0" />
+                  <span class="flex items-center justify-center w-9 h-9 rounded-full shrink-0" style="color: var(--text);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  </span>
+                  <span class="flex flex-col gap-0.5">
+                    <span class="font-display text-sm font-semibold">Friends</span>
+                    <span class="text-sm" style="color: var(--muted);">Only people you follow back — you have to follow each other.</span>
+                  </span>
+                </label>
+
+                <label class="visibility-option-disabled flex items-start gap-3 rounded-xl p-4">
+                  <input type="radio" name="comments_visibility" value="only_me" disabled class="mt-1 w-4 h-4 shrink-0" />
+                  <span class="flex items-center justify-center w-9 h-9 rounded-full shrink-0" style="color: var(--text);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </span>
+                  <span class="flex flex-col gap-0.5">
+                    <span class="font-display text-sm font-semibold">Only me</span>
+                    <span class="text-sm" style="color: var(--muted);">Visible to just you — no one else can see your comments.</span>
+                  </span>
+                </label>
+
+              </div>
+              <p class="text-xs mt-3" style="color: var(--muted);">
+                Comments hasn't shipped yet — you'll be able to set this once it does.
+              </p>
+            </fieldset>
+
+            <div class="flex items-center gap-3 mt-2">
+              <button
+                type="submit"
+                class="font-display text-sm font-semibold rounded-lg px-4 py-2"
+                style="background: var(--primary); color: var(--on-fill);"
+              >
+                Save changes
+              </button>
+              <a href="profile.html" class="text-sm font-medium rounded-lg px-4 py-2" style="border: 1px solid var(--border); color: var(--text);">
+                Cancel
+              </a>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

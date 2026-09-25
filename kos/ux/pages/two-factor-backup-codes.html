@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Backup codes — mockup (Phase 2 preview)</title>
+
+<!-- Phase 2 preview, see two-factor-auth-preview.md's 2026-09-02 update — backup codes were
+     originally scoped out of the initial 2FA build, brought into scope for this mockup pass on
+     request; that file's update note has the full history.
+
+     One file, two entry points/contexts (mockup-only, read from ?context= — no real routing
+     logic needed for a static page):
+     - ?context=enrolled (linked from two-factor-enroll.html, right after first confirming a
+       code): "Save your backup codes now" framing, all 10 codes fresh/unused.
+     - No param / ?context=view (linked from security-settings.html's "View backup codes", once
+       2FA is already on): neutral "Backup codes" framing, and demonstrates the "used once" rule
+       concretely by showing 2 of the 10 already spent (struck through, grayed) rather than only
+       explaining it in copy.
+
+     Real flow this stands in for: 10 codes generated server-side and shown exactly once at
+     generation time (enrolled context) — a real build would need to keep them out of the page
+     source thereafter, this mockup's sample codes are static demo data only. "Generate new codes"
+     invalidates the old set, same danger-fill confirm pattern as security-settings.html's
+     turn-off dialog (modal-dialog.md).
+
+     Monospace note: codes use Tailwind's default font-mono utility (system stack), not IBM Plex
+     Mono — reserved for handles/timestamps per typography.md, same call as two-factor-enroll.html.
+
+     God moment check (mockup-guardrails.md): none of god-moments.md's 5 entries — security/
+     account-management infrastructure, same allowance already used for security-settings.html. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — identical tokens to every other mockup. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13;
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display { font-family: 'Sora', sans-serif; }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  a, button {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a, button { transition: none; }
+    dialog, dialog::backdrop { transition: none; }
+  }
+
+  .backup-code.used {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+
+  /* Regenerate-confirm dialog (modal-dialog.md) — same pattern as security-settings.html's
+     turn-off-dialog / profile.html's delete-confirm. */
+  dialog#regenerate-dialog {
+    padding: 0;
+    border: none;
+    border-radius: 1rem;
+    background: var(--surface);
+    color: var(--text);
+    opacity: 0;
+    transform: scale(0.97);
+    transition: opacity 150ms ease, transform 150ms ease, overlay 150ms ease allow-discrete, display 150ms ease allow-discrete;
+  }
+  dialog#regenerate-dialog[open] {
+    opacity: 1;
+    transform: scale(1);
+  }
+  @starting-style {
+    dialog#regenerate-dialog[open] {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+  dialog#regenerate-dialog::backdrop {
+    background: var(--text);
+    opacity: 0;
+    transition: opacity 150ms ease allow-discrete;
+  }
+  dialog#regenerate-dialog[open]::backdrop {
+    opacity: 0.35;
+  }
+  @starting-style {
+    dialog#regenerate-dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail — same shell as security-settings.html. -->
+    <aside class="w-20 shrink-0 sticky top-0 h-screen flex flex-col items-center py-6 gap-2" style="border-right: 1px solid var(--border); background: var(--background);">
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <a href="feed.html" title="Feed" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+        <a href="directory.html" title="Directory" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+        <a href="notifications.html" title="Notifications" class="relative flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+        </a>
+        <!-- Friend requests — new (friend-requests-preview.md), back-ported across every page
+             mockup carrying this rail. Person + checkmark, not Directory's two-person glyph. -->
+        <a href="friend-requests.html" title="Friend requests" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M15 11.5l2 2 4-4.5" />
+          </svg>
+        </a>
+        <a href="messages.html" title="Messages" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+          </svg>
+        </a>
+      </nav>
+
+      <a href="profile.html" title="Your profile" aria-current="page" class="mt-auto mb-2 shrink-0 rounded-full p-0.5" style="background: var(--primary);">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-semibold" style="background: var(--secondary); color: var(--on-fill);">YK</span>
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <main class="max-w-lg mx-auto px-6 py-10">
+        <div class="flex items-center justify-between gap-4 mb-2">
+          <h1 id="page-title" class="font-display text-2xl font-semibold">Backup codes</h1>
+          <a href="security-settings.html" class="text-sm font-medium" style="color: var(--muted);">Back</a>
+        </div>
+
+        <p class="text-xs mb-2" style="color: var(--muted);">
+          Preview — not committed yet, see
+          <span class="font-medium" style="color: var(--secondary);">two-factor-auth-preview.md</span>.
+        </p>
+
+        <p id="intro-copy" class="text-sm mb-6" style="color: var(--muted);">
+          Each code works once, if you ever lose access to your authenticator app.
+        </p>
+
+        <div class="rounded-2xl p-6" style="background: var(--surface); border: 1px solid var(--border);">
+          <div id="codes-grid" class="grid grid-cols-2 gap-x-6 gap-y-3">
+            <span class="backup-code font-mono text-sm" data-code>7FQ2-K9WM</span>
+            <span class="backup-code font-mono text-sm" data-code>P3XR-4HDT</span>
+            <span class="backup-code font-mono text-sm" data-code data-used-in-view>V8LN-2BQC</span>
+            <span class="backup-code font-mono text-sm" data-code>QW6Y-J5FZ</span>
+            <span class="backup-code font-mono text-sm" data-code>M4TS-8KXE</span>
+            <span class="backup-code font-mono text-sm" data-code data-used-in-view>D2GH-7RVN</span>
+            <span class="backup-code font-mono text-sm" data-code>9ZCL-QM3B</span>
+            <span class="backup-code font-mono text-sm" data-code>K5PW-6UYX</span>
+            <span class="backup-code font-mono text-sm" data-code>T7NF-1ADQ</span>
+            <span class="backup-code font-mono text-sm" data-code>3RXJ-9LGM</span>
+          </div>
+
+          <div class="flex items-center gap-4 mt-5 pt-5" style="border-top: 1px solid var(--border);">
+            <button type="button" onclick="copyAllCodes()" class="text-sm font-medium" style="color: var(--primary);">
+              Copy all
+            </button>
+            <button type="button" onclick="document.getElementById('regenerate-dialog').showModal()" class="text-sm font-medium" style="color: var(--danger);">
+              Generate new codes
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <a
+            href="security-settings.html"
+            class="font-display text-sm font-semibold rounded-lg px-4 py-2 inline-block"
+            style="background: var(--primary); color: var(--on-fill);"
+          >
+            Done
+          </a>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Regenerate-confirm dialog (modal-dialog.md) -->
+  <dialog id="regenerate-dialog" class="w-full max-w-sm">
+    <div class="p-6 flex flex-col gap-4">
+      <div>
+        <p class="font-display text-lg font-semibold">Generate new backup codes?</p>
+        <p class="text-sm mt-1" style="color: var(--muted);">Your old codes will stop working.</p>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          onclick="document.getElementById('regenerate-dialog').close()"
+          class="text-sm font-medium rounded-lg px-4 py-2"
+          style="border: 1px solid var(--border); color: var(--text);"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onclick="document.getElementById('regenerate-dialog').close()"
+          class="font-display text-sm font-semibold rounded-lg px-4 py-2"
+          style="background: var(--danger); color: var(--on-fill);"
+        >
+          Generate new codes
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    // Mockup-only — not app UI. Reads ?context= to switch framing between "just enrolled" and
+    // "revisiting an already-on account" (default), same spirit as every other mockup's preview
+    // toggle, just driven by the query string instead of a button since it's set by the linking
+    // page rather than demoed in place.
+    const context = new URLSearchParams(window.location.search).get('context') || 'view';
+
+    if (context === 'enrolled') {
+      document.getElementById('page-title').textContent = 'Save your backup codes';
+      document.getElementById('intro-copy').textContent =
+        "Two-factor authentication is on. Save these codes somewhere safe — each one can be used once if you lose access to your authenticator app.";
+    } else {
+      // Viewing an existing set demonstrates the "used once" rule concretely instead of only
+      // explaining it in copy — 2 of the 10 sample codes render as already spent.
+      document.querySelectorAll('[data-used-in-view]').forEach((el) => {
+        el.classList.add('used');
+        el.textContent += ' · used';
+      });
+    }
+
+    function copyAllCodes() {
+      const codes = Array.from(document.querySelectorAll('[data-code]:not(.used)'))
+        .map((el) => el.textContent.trim())
+        .join('\n');
+      if (navigator.clipboard) navigator.clipboard.writeText(codes);
+    }
+  </script>
+
+</body>
+</html>

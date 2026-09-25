@@ -1,0 +1,564 @@
+<title>Icon Specimen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg: #FAF9FA;
+    --surface: #F9F6F8;
+    --border: #E4DAE1;
+    --text: #2B2229;
+    --muted: #74636F;
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --success: #2D764B;
+    --warning: #E2A412;
+    --danger: #BE2D39;
+    --on-fill: #FFFFFF;
+    --on-warning: #2B2229;
+    --tint-primary: rgba(118, 45, 100, 0.13);
+    --tint-secondary: rgba(159, 86, 141, 0.15);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #140F13;
+      --surface: #21181E;
+      --border: #574252;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --success: #59C084;
+      --warning: #EFB839;
+      --danger: #D4545E;
+      --on-fill: #140F13;
+      --on-warning: #140F13;
+      --tint-primary: rgba(211, 105, 185, 0.16);
+      --tint-secondary: rgba(202, 145, 188, 0.16);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #140F13;
+    --surface: #21181E;
+    --border: #574252;
+    --text: #EDE9EC;
+    --muted: #A696A2;
+    --primary: #D369B9;
+    --secondary: #CA91BC;
+    --accent: #E444BC;
+    --success: #59C084;
+    --warning: #EFB839;
+    --danger: #D4545E;
+    --on-fill: #140F13;
+    --on-warning: #140F13;
+    --tint-primary: rgba(211, 105, 185, 0.16);
+    --tint-secondary: rgba(202, 145, 188, 0.16);
+  }
+
+  *{ box-sizing: border-box; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .doc{ max-width: 860px; margin: 0 auto; padding: 4.5rem 1.5rem 6rem; }
+  ::selection{ background: var(--accent); color: var(--on-fill); }
+  a{ color: var(--primary); }
+  :focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .eyebrow{
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* icon sprite: geometry lives once, every candidate restyles the same paths */
+  svg.icon{
+    width: 1em; height: 1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    overflow: visible;
+  }
+
+  /* ---- Masthead ---- */
+  .masthead{ padding-bottom: 2.5rem; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+  .masthead h1{
+    font-family: "Sora", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5.2vw, 2.9rem);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0.6rem 0 1.1rem;
+    color: var(--text);
+  }
+  .masthead p{ max-width: 62ch; color: var(--muted); font-size: 1.05rem; }
+  .masthead .brief{
+    margin-top: 1.75rem;
+    padding: 1.1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    font-size: 0.92rem;
+    color: var(--text);
+    max-width: 62ch;
+  }
+  .masthead .brief b{ color: var(--primary); }
+  .masthead .brief code{ font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.85em; }
+
+  /* ---- Recommendation block ---- */
+  .rec{ margin-bottom: 4.5rem; }
+  .rec-head{ margin-bottom: 1.5rem; }
+  .rec-code{ color: var(--secondary); }
+  .rec-head h2{
+    font-family: "Sora", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 1.6rem;
+    margin: 0.35rem 0 0.5rem;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+  .rec-head .twist{ max-width: 66ch; color: var(--muted); font-size: 0.98rem; }
+  .rec-head .twist strong{ color: var(--text); font-weight: 600; }
+
+  .stack{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2.25rem 2rem;
+  }
+
+  /* hero glyph row */
+  .hero-row{ display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.75rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
+  .hero-glyph{ font-size: 3.6rem; line-height: 1; display: grid; place-items: center; flex: none; }
+  .hero-glyph svg{ width: 1em; height: 1em; }
+  .hero-rules{ display: flex; flex-direction: column; gap: 0.35rem; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.75rem; color: var(--muted); }
+  .hero-rules span b{ color: var(--text); font-weight: 500; }
+
+  /* icon grid */
+  .icon-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .icon-cell{ display: flex; flex-direction: column; align-items: center; gap: 0.55rem; }
+  .icon-tile{
+    width: 52px; height: 52px;
+    display: grid; place-items: center;
+    font-size: 1.5rem;
+    border-radius: 999px;
+    color: var(--muted);
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .icon-cell .label{ font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.68rem; color: var(--muted); text-align: center; }
+  .icon-cell .state{ font-size: 0.68rem; color: var(--secondary); }
+
+  /* context mock: nav bar + user row + post actions, reused verbatim per candidate */
+  .mock{ display: grid; gap: 1.1rem; }
+  .mock-nav{
+    display: flex; align-items: center; gap: 1.6rem;
+    padding: 0.85rem 1.1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .mock-nav .item{ display: flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; color: var(--muted); }
+  .mock-nav .item svg{ font-size: 1.15rem; }
+  .mock-nav .item.current{ color: var(--text); font-weight: 600; }
+  .mock-user{
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    padding: 0.9rem 1.1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .mock-user .who{ display: flex; align-items: center; gap: 0.7rem; }
+  .mock-user .avatar{ width: 34px; height: 34px; border-radius: 50%; background: var(--secondary); color: var(--on-fill); display: grid; place-items: center; font-family: "Sora", sans-serif; font-weight: 600; font-size: 0.75rem; flex: none; }
+  .mock-user .name{ font-weight: 600; font-size: 0.92rem; color: var(--text); }
+  .mock-user .handle{ font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.75rem; color: var(--muted); }
+  .mock-user .btns{ display: flex; gap: 0.6rem; }
+  .btn{
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: default;
+  }
+  .btn svg{ font-size: 1rem; }
+  .mock-post{
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .mock-post .post-line{ color: var(--text); font-size: 0.88rem; max-width: 34ch; }
+  .mock-post .actions{ display: flex; gap: 0.9rem; flex: none; }
+  .mock-post .actions .icon-tile{ width: 36px; height: 36px; font-size: 1.15rem; cursor: default; }
+  .mock-hint{ font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.7rem; color: var(--muted); font-style: normal; }
+
+  /* spec table */
+  .spec{ margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .spec table{ width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .spec th{ text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; padding: 0 0.5rem 0.5rem 0; }
+  .spec td{ padding: 0.4rem 0.5rem 0.4rem 0; color: var(--text); border-top: 1px solid var(--border); vertical-align: baseline; }
+  .spec td:first-child{ color: var(--muted); white-space: nowrap; }
+  .spec-wrap{ overflow-x: auto; }
+
+  /* ---- 315.4 Plain Line ---- */
+  .r-pl svg.icon{ stroke-width: 1.25; }
+  .r-pl .icon-tile{ color: var(--muted); }
+  .r-pl .hero-glyph{ color: var(--muted); }
+  .r-pl .mock-nav .item.current{ color: var(--primary); }
+  .r-pl .mock-nav .item.current svg{ color: var(--primary); }
+  .r-pl .mock-user .btns .btn.following{ color: var(--primary); border-color: var(--primary); }
+  .r-pl .mock-post .actions .icon-tile.danger-hover:hover{ color: var(--danger); }
+
+  /* ---- 315.5 Signal Weight (recommended) ---- */
+  .r-sw svg.icon{ stroke-width: 1.75; }
+  .r-sw .icon-tile{ color: var(--muted); }
+  .r-sw .hero-glyph{ color: var(--on-fill); background: var(--primary); border-radius: 999px; }
+  .r-sw .icon-cell.signal .icon-tile{ background: var(--tint-primary); color: var(--primary); }
+  .r-sw .mock-nav .item.current .icon-tile{ background: var(--primary); color: var(--on-fill); }
+  .r-sw .mock-nav .item svg{ display: block; }
+  .r-sw .mock-nav .item .icon-tile{ width: 30px; height: 30px; border-radius: 999px; font-size: 1.1rem; }
+  .r-sw .mock-user .btns .btn.following{ background: var(--tint-secondary); border-color: transparent; color: var(--secondary); }
+  .r-sw .mock-post .actions .icon-tile.danger-hover:hover{ background: var(--danger); color: var(--on-fill); }
+
+  /* ---- 315.6 Duotone Plum ---- */
+  .r-dp .icon-tile{ background: var(--tint-primary); color: var(--primary); }
+  .r-dp svg.icon{ stroke-width: 1.5; }
+  .r-dp .hero-glyph{ background: var(--tint-primary); color: var(--primary); border-radius: 999px; }
+  .r-dp .mock-nav .item .icon-tile{ width: 30px; height: 30px; border-radius: 999px; font-size: 1.1rem; background: var(--tint-primary); color: var(--primary); }
+  .r-dp .mock-nav .item.current .icon-tile{ background: var(--primary); color: var(--on-fill); }
+  .r-dp .mock-user .btns .btn.following{ background: var(--tint-secondary); border-color: transparent; color: var(--secondary); }
+  .r-dp .mock-post .actions .icon-tile{ background: var(--tint-secondary); color: var(--secondary); }
+  .r-dp .mock-post .actions .icon-tile.danger-hover:hover{ background: rgba(190,45,57,0.15); color: var(--danger); }
+
+  /* ---- Verdict ---- */
+  .verdict{ margin-top: 4rem; padding-top: 2.5rem; border-top: 1px solid var(--border); }
+  .verdict h2{ font-family: "Sora", ui-sans-serif, system-ui, sans-serif; font-weight: 700; font-size: 1.6rem; margin: 0.5rem 0 1rem; }
+  .verdict p{ max-width: 66ch; color: var(--text); }
+  .verdict p.muted{ color: var(--muted); font-size: 0.95rem; }
+  .verdict .pick{
+    display: inline-block; margin: 0.25rem 0 1.25rem;
+    padding: 0.3rem 0.7rem;
+    background: var(--primary); color: var(--on-fill);
+    font-family: "IBM Plex Mono", monospace; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  footer{ margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; color: var(--muted); }
+</style>
+
+<!-- icon geometry, defined once, restyled per candidate below -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-feed" viewBox="0 0 24 24">
+      <path d="M4 12 12 4l8 8"/>
+      <path d="M6 10v10h4v-6h4v6h4V10"/>
+    </symbol>
+    <symbol id="i-directory" viewBox="0 0 24 24">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="3.5"/>
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+      <path d="M15.5 3.2a3.5 3.5 0 0 1 0 6.8"/>
+    </symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24">
+      <path d="M6 10a6 6 0 0 1 12 0c0 4.4 1.6 5.9 2 6.4H4c.4-.5 2-2 2-6.4z"/>
+      <path d="M10 19a2 2 0 0 0 4 0"/>
+    </symbol>
+    <symbol id="i-profile" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+    </symbol>
+    <symbol id="i-compose" viewBox="0 0 24 24">
+      <rect x="4" y="4" width="16" height="16" rx="3"/>
+      <path d="M12 9v6M9 12h6"/>
+    </symbol>
+    <symbol id="i-follow" viewBox="0 0 24 24">
+      <circle cx="9" cy="8" r="3.5"/>
+      <path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/>
+      <path d="M18 8v6M15 11h6"/>
+    </symbol>
+    <symbol id="i-following" viewBox="0 0 24 24">
+      <circle cx="9" cy="8" r="3.5"/>
+      <path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/>
+      <path d="M15 11.5l2 2 4-4.5"/>
+    </symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24">
+      <path d="M4 20l.7-3.5L15.5 5.7l2.8 2.8L7.5 19.3 4 20z"/>
+      <path d="M13.8 7.4l2.8 2.8"/>
+    </symbol>
+    <symbol id="i-delete" viewBox="0 0 24 24">
+      <path d="M5 7h14"/>
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+      <path d="M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13"/>
+      <path d="M10 11v6M14 11v6"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="doc">
+
+  <div class="masthead">
+    <span class="eyebrow">Icon decision — Single Thread</span>
+    <h1>Three ways to draw the mark</h1>
+    <p>The palette settled on one hue tuned only by lightness and saturation. The type settled on
+    one sans pairing, mono reserved for identity alone. Icons are the next surface asking the same
+    question: what's the one thing that's allowed to change, and what does it mean when it does?
+    Three recommendations below, each answering it differently — same eight glyphs, same nav bar,
+    same follow button, only the rendering rule changes.</p>
+    <div class="brief">
+      <b>The fixture:</b> eight functional icons the MVP actually needs — feed, directory,
+      notifications, profile, compose, follow, edit, delete — drawn once as line geometry and
+      reused via <code>&lt;use&gt;</code> in every candidate below, plus a nav bar, a directory
+      row, and a post's edit/delete row so each rule shows up in real context, not just a swatch.
+      Colors are the live Single Thread tokens, light or dark depending on how you're reading
+      this.
+    </div>
+  </div>
+
+  <!-- 315.4 -->
+  <section class="rec r-pl">
+    <div class="rec-head">
+      <span class="eyebrow rec-code">315.4 — Plain Line</span>
+      <h2>One weight, one fill state: none</h2>
+      <p class="twist">The twist: <strong>color is the only lever, ever.</strong> Every icon is a
+      thin, uniform line — 1.25px, never filled, never boxed — at rest or in any state. A current
+      nav tab or a followed button doesn't get a badge or a background; it just shifts from muted
+      to primary, the same way the palette itself carries meaning through lightness and saturation
+      shifts on one hue rather than reaching for a new shape.</p>
+    </div>
+    <div class="stack">
+      <div class="hero-row">
+        <span class="hero-glyph"><svg class="icon"><use href="#i-bell"/></svg></span>
+        <div class="hero-rules">
+          <span><b>Stroke</b> — 1.25px, constant everywhere</span>
+          <span><b>Fill</b> — never, in any state</span>
+          <span><b>State signal</b> — color shift only (muted → primary)</span>
+        </div>
+      </div>
+      <div class="icon-grid">
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-feed"/></svg></span><span class="label">feed</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-directory"/></svg></span><span class="label">directory</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-bell"/></svg></span><span class="label">notifications</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-profile"/></svg></span><span class="label">profile</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-compose"/></svg></span><span class="label">compose</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-follow"/></svg></span><span class="label">follow</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-edit"/></svg></span><span class="label">edit</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-delete"/></svg></span><span class="label">delete</span></div>
+      </div>
+      <div class="mock">
+        <div class="mock-nav">
+          <span class="item"><svg class="icon"><use href="#i-feed"/></svg>Feed</span>
+          <span class="item current"><svg class="icon"><use href="#i-directory"/></svg>Directory</span>
+          <span class="item"><svg class="icon"><use href="#i-bell"/></svg>Notifications</span>
+          <span class="item"><svg class="icon"><use href="#i-profile"/></svg>Profile</span>
+        </div>
+        <div class="mock-user">
+          <div class="who">
+            <span class="avatar">MK</span>
+            <div><div class="name">Marisol Kade</div><div class="handle">@marisol_k</div></div>
+          </div>
+          <div class="btns">
+            <span class="btn"><svg class="icon"><use href="#i-follow"/></svg>Follow</span>
+            <span class="btn following"><svg class="icon"><use href="#i-following"/></svg>Following</span>
+          </div>
+        </div>
+        <div class="mock-post">
+          <span class="post-line">"Deleted this three times and I'm posting it anyway…"</span>
+          <div class="actions">
+            <span class="icon-tile"><svg class="icon"><use href="#i-edit"/></svg></span>
+            <span class="icon-tile danger-hover"><svg class="icon"><use href="#i-delete"/></svg></span>
+          </div>
+        </div>
+        <span class="mock-hint">↑ hover delete — even destructive intent only ever shifts color</span>
+      </div>
+      <div class="spec spec-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Stroke</th><th>Fill rule</th><th>Where</th></tr></thead>
+          <tbody>
+            <tr><td>All icons</td><td>1.25px</td><td>never</td><td>nav, directory, posts, everywhere</td></tr>
+            <tr><td>State</td><td>1.25px</td><td>never — color only</td><td>current tab, followed, hover</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 315.5 -->
+  <section class="rec r-sw">
+    <div class="rec-head">
+      <span class="eyebrow rec-code">315.5 — Signal Weight</span>
+      <h2>Line by default, fill only for meaning</h2>
+      <p class="twist">The twist: <strong>a filled chip is reserved for state, never decoration.</strong>
+      Every icon rests as a plain 1.75px line — a touch more confident than 315.4 — until
+      something true has to be signaled: the tab you're on, the notification you haven't read, the
+      person you already follow, the delete you're about to commit to. Only then does a solid
+      chip appear. It's the same rule the palette already made: Success/Warning/Danger break the
+      single hue only for status, never for brand. Here, fill breaks the outline only for state,
+      never for brand.</p>
+    </div>
+    <div class="stack">
+      <div class="hero-row">
+        <span class="hero-glyph"><svg class="icon"><use href="#i-bell"/></svg></span>
+        <div class="hero-rules">
+          <span><b>Stroke</b> — 1.75px at rest, outline only</span>
+          <span><b>Fill</b> — a solid chip, state-triggered only</span>
+          <span><b>State signal</b> — "Someone Noticed Me" gets a filled bell, not just a color</span>
+        </div>
+      </div>
+      <div class="icon-grid">
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-feed"/></svg></span><span class="label">feed</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-directory"/></svg></span><span class="label">directory</span></div>
+        <div class="icon-cell signal"><span class="icon-tile"><svg class="icon"><use href="#i-bell"/></svg></span><span class="label">notifications</span><span class="state">unread</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-profile"/></svg></span><span class="label">profile</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-compose"/></svg></span><span class="label">compose</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-follow"/></svg></span><span class="label">follow</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-edit"/></svg></span><span class="label">edit</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-delete"/></svg></span><span class="label">delete</span></div>
+      </div>
+      <div class="mock">
+        <div class="mock-nav">
+          <span class="item"><span class="icon-tile"><svg class="icon"><use href="#i-feed"/></svg></span>Feed</span>
+          <span class="item current"><span class="icon-tile"><svg class="icon"><use href="#i-directory"/></svg></span>Directory</span>
+          <span class="item"><span class="icon-tile"><svg class="icon"><use href="#i-bell"/></svg></span>Notifications</span>
+          <span class="item"><span class="icon-tile"><svg class="icon"><use href="#i-profile"/></svg></span>Profile</span>
+        </div>
+        <div class="mock-user">
+          <div class="who">
+            <span class="avatar">MK</span>
+            <div><div class="name">Marisol Kade</div><div class="handle">@marisol_k</div></div>
+          </div>
+          <div class="btns">
+            <span class="btn"><svg class="icon"><use href="#i-follow"/></svg>Follow</span>
+            <span class="btn following"><svg class="icon"><use href="#i-following"/></svg>Following</span>
+          </div>
+        </div>
+        <div class="mock-post">
+          <span class="post-line">"Deleted this three times and I'm posting it anyway…"</span>
+          <div class="actions">
+            <span class="icon-tile"><svg class="icon"><use href="#i-edit"/></svg></span>
+            <span class="icon-tile danger-hover"><svg class="icon"><use href="#i-delete"/></svg></span>
+          </div>
+        </div>
+        <span class="mock-hint">↑ hover delete — this is the one place fill means "this commits"</span>
+      </div>
+      <div class="spec spec-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Stroke</th><th>Fill rule</th><th>Where</th></tr></thead>
+          <tbody>
+            <tr><td>Rest</td><td>1.75px</td><td>none — outline only</td><td>nav, directory, posts</td></tr>
+            <tr><td>Current tab</td><td>1.75px</td><td>chip, primary</td><td>active nav item</td></tr>
+            <tr><td>Unread</td><td>1.75px</td><td>chip, primary tint</td><td>notification bell</td></tr>
+            <tr><td>Followed</td><td>1.75px</td><td>chip, secondary tint</td><td>"Following" button</td></tr>
+            <tr><td>Destructive</td><td>1.75px</td><td>chip, danger, on hover</td><td>delete on a post</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 315.6 -->
+  <section class="rec r-dp">
+    <div class="rec-head">
+      <span class="eyebrow rec-code">315.6 — Duotone Plum</span>
+      <h2>Every icon rides a tinted chip, always</h2>
+      <p class="twist">The twist: <strong>the palette's own hue becomes the icon's material, not
+      just its accent.</strong> Every glyph — rest, active, unread, idle — sits on a soft plum
+      tint with a solid stroke on top, all the time. It's the purest visual echo of "one hue
+      carried by lightness and saturation," now applied to shape instead of just color. The
+      boldest signature of the three, and the one with nothing held in reserve: if the chip is
+      always there, it can't tell you when something changed.</p>
+    </div>
+    <div class="stack">
+      <div class="hero-row">
+        <span class="hero-glyph"><svg class="icon"><use href="#i-bell"/></svg></span>
+        <div class="hero-rules">
+          <span><b>Stroke</b> — 1.5px, on a filled chip</span>
+          <span><b>Fill</b> — a plum tint, every icon, every state</span>
+          <span><b>State signal</b> — chip deepens to solid; nothing appears from nothing</span>
+        </div>
+      </div>
+      <div class="icon-grid">
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-feed"/></svg></span><span class="label">feed</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-directory"/></svg></span><span class="label">directory</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-bell"/></svg></span><span class="label">notifications</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-profile"/></svg></span><span class="label">profile</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-compose"/></svg></span><span class="label">compose</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-follow"/></svg></span><span class="label">follow</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-edit"/></svg></span><span class="label">edit</span></div>
+        <div class="icon-cell"><span class="icon-tile"><svg class="icon"><use href="#i-delete"/></svg></span><span class="label">delete</span></div>
+      </div>
+      <div class="mock">
+        <div class="mock-nav">
+          <span class="item"><span class="icon-tile"><svg class="icon"><use href="#i-feed"/></svg></span>Feed</span>
+          <span class="item current"><span class="icon-tile"><svg class="icon"><use href="#i-directory"/></svg></span>Directory</span>
+          <span class="item"><span class="icon-tile"><svg class="icon"><use href="#i-bell"/></svg></span>Notifications</span>
+          <span class="item"><span class="icon-tile"><svg class="icon"><use href="#i-profile"/></svg></span>Profile</span>
+        </div>
+        <div class="mock-user">
+          <div class="who">
+            <span class="avatar">MK</span>
+            <div><div class="name">Marisol Kade</div><div class="handle">@marisol_k</div></div>
+          </div>
+          <div class="btns">
+            <span class="btn"><svg class="icon"><use href="#i-follow"/></svg>Follow</span>
+            <span class="btn following"><svg class="icon"><use href="#i-following"/></svg>Following</span>
+          </div>
+        </div>
+        <div class="mock-post">
+          <span class="post-line">"Deleted this three times and I'm posting it anyway…"</span>
+          <div class="actions">
+            <span class="icon-tile"><svg class="icon"><use href="#i-edit"/></svg></span>
+            <span class="icon-tile danger-hover"><svg class="icon"><use href="#i-delete"/></svg></span>
+          </div>
+        </div>
+        <span class="mock-hint">↑ hover delete — the tint deepens; it was already there either way</span>
+      </div>
+      <div class="spec spec-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Stroke</th><th>Fill rule</th><th>Where</th></tr></thead>
+          <tbody>
+            <tr><td>All icons</td><td>1.5px</td><td>tint chip, always on</td><td>nav, directory, posts, everywhere</td></tr>
+            <tr><td>Current tab</td><td>1.5px</td><td>chip deepens to solid primary</td><td>active nav item</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="verdict">
+    <span class="eyebrow">Recommendation</span>
+    <h2>Lean toward 315.5</h2>
+    <span class="pick">Signal Weight</span>
+    <p>Every identity decision so far has landed on the same shape: one restrained default, broken
+    only when it has to carry real meaning — never for decoration. The palette keeps Success/
+    Warning/Danger off-hue only for status. The type keeps mono off-sans only for identity. 315.5
+    is the icon language that keeps that promise: outline everywhere, and a fill only shows up
+    where <a href="../decisions/god-moments.md">[[god-moments]]</a> says something is actually
+    happening — the bell fills the moment "Someone Noticed Me" is true, not before.</p>
+    <p><strong>315.4</strong> is the safer runner-up, and arguably the most literal read of
+    "Single Thread" — if the palette itself never reaches for a new shape, an icon set that never
+    fills either is defensible on principle. Worth keeping in the back pocket if 315.5's chip
+    treatment feels heavier than the rest of the UI once it's built. <strong>315.6</strong> is the
+    one worth a second look before ruling out — it's the most memorable at a glance, the kind of
+    detail that makes screenshots recognizable — but a chip on every icon all the time has no
+    reserve left to spend on the moment that actually matters, which is the opposite of what
+    Success/Warning/Danger and mono-for-identity were both for.</p>
+    <p class="muted">Once one is picked, it gets written up the same way color and type were —
+    decision, rationale, a role table — in <code>kos/decisions/ux/iconography.md</code>.</p>
+  </div>
+
+  <footer>Single Thread · icon specimen · 2026-09-01 · colors from kos/decisions/ux/color-scheme.md · type from kos/decisions/ux/typography.md</footer>
+
+</div>

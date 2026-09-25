@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Directory — mockup</title>
+
+<!-- God moment check (mockup-guardrails.md): this IS one of the 5 god moments directly —
+     god-moments.md #2, "I Found My People." It's also the logged-out root path
+     (public-vs-authenticated-pages.md), so it doubles as the very first thing a new visitor
+     sees. Job here: make browsing feel like meeting people, not scanning a database dump —
+     name + bio + a clear way into their profile, nothing else competing for attention.
+
+     Redraw v2: Directory is public and reachable both logged-out (default view here) and from
+     inside the app via feed.html's rail — added a mockup-only toggle so both states live in
+     this one file. The Log in/Sign up header below is the canonical logged-out state; the
+     left icon-rail (feed.html's pattern) is what a logged-in visitor sees instead. No thread-
+     connector here — that motif is Feed-only (a chronological stream), not this card grid. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 for display, Inter 400 for body.
+     IBM Plex Mono (identity-only: handles/timestamps/follow-notices) is intentionally not
+     loaded — this screen has no handles or timestamps, just names and bios. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — the one hand-authored CSS the guardrails allow:
+     custom properties for tokens, font-family declarations, and the couple of native selectors
+     Tailwind has no utility for. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13; /* dark theme's own background, per color-scheme.md's fill-role rule */
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display {
+    font-family: 'Sora', sans-serif;
+  }
+
+  /* Focus rule (tech-stack.md): every interactive element gets a visible 2px accent outline,
+     2px offset. :focus-visible has no Tailwind utility, so it's hand-authored here. */
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Motion (tech-stack.md): component-only 150ms ease transitions, dropped for reduced motion. */
+  a,
+  button {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button {
+      transition: none;
+    }
+  }
+
+  /* Bio clamp — one hand-authored rule Tailwind's default build has no utility for without the
+     line-clamp plugin (not pulled in for a CDN-only mockup); keeps one long bio from stretching
+     a card taller than its neighbors in the grid. */
+  .bio-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail (logged-in state only) — same pattern as feed.html, Directory as the
+         current tab. Hidden by default; the toggle button below the page heading swaps this in
+         for the logged-out header. -->
+    <aside
+      id="rail-logged-in"
+      class="hidden w-20 shrink-0 sticky top-0 h-screen flex-col items-center py-6 gap-2"
+      style="border-right: 1px solid var(--border); background: var(--background);"
+    >
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <!-- Feed — outline at rest, same glyph as feed.html's current-tab icon -->
+        <a
+          href="feed.html"
+          title="Feed"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+
+        <!-- Directory — current tab: solid primary chip, w-4 h-4 icon per iconography.md's nav-item spec -->
+        <a
+          href="directory.html"
+          aria-current="page"
+          title="Directory"
+          class="flex items-center justify-center p-1.5 rounded-full"
+          style="background: var(--primary);"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color: var(--on-fill);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+
+        <!-- Notifications — unread: solid primary chip (iconography.md's "unread bell" chip
+             state) plus the accent corner dot on top, per notifications-ui.md. Full read/unread
+             toggle lives in components/nav.html. -->
+        <a
+          href="notifications.html"
+          title="Notifications"
+          class="relative flex items-center justify-center p-1.5 rounded-full"
+          style="background: var(--primary);"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color: var(--on-fill);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full" style="background: var(--accent); border: 2px solid var(--background);"></span>
+        </a>
+
+        <!-- Friend requests — new (friend-requests-preview.md), back-ported across every page
+             mockup carrying this rail, same convention Messages used. Person + checkmark, not
+             Directory's two-person glyph, to stay unambiguous one slot away from it. No unread
+             badge, same no-badge precedent Messages already set. -->
+        <a href="friend-requests.html" title="Friend requests" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M15 11.5l2 2 4-4.5" />
+          </svg>
+        </a>
+
+        <!-- Messages — new (direct-messages-preview.md), back-ported across every page mockup
+             carrying this rail. Last in the rail, above the avatar: the one nav item with no
+             god-moment tie, kept after the three that do have one. Lucide "mail," not
+             message-circle (already spoken for by Comments). -->
+        <a
+          href="messages.html"
+          title="Messages"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+          </svg>
+        </a>
+      </nav>
+
+      <!-- Profile — the viewer's own avatar, per iconography.md's avatar rule -->
+      <a href="#" title="Your profile" class="mt-auto mb-2 shrink-0 rounded-full">
+        <span
+          class="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-semibold"
+          style="background: var(--secondary); color: var(--on-fill);"
+        >
+          YK
+        </span>
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+  <!-- Top bar (logged-out state, default): no app wordmark (nothing decided yet in the KOS) and
+       no full nav (nav placement/layout still open per notifications-ui.md) — just the two entry
+       points a logged-out visitor needs, mirroring the Log in / Sign up relationship already used
+       in the auth-card footers (login.html / signup.html), relocated here since this page has no
+       single card to hang a footer off. -->
+  <header id="header-logged-out" class="flex items-center justify-end gap-4 px-6 py-4" style="border-bottom: 1px solid var(--border);">
+    <a href="#" class="text-sm font-medium" style="color: var(--primary);">Log in</a>
+    <a
+      href="#"
+      class="font-display text-sm font-semibold rounded-lg px-4 py-2"
+      style="background: var(--primary); color: var(--on-fill);"
+    >
+      Sign up
+    </a>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-10">
+    <div class="flex items-start justify-between gap-4 mb-8">
+      <div>
+        <h1 class="font-display text-2xl font-semibold mb-1">Directory</h1>
+        <p class="text-sm" style="color: var(--muted);">Find people to follow.</p>
+      </div>
+      <!-- Mockup-only state toggles — not app UI, just let this file demonstrate multiple states
+           without separate HTML files. Real app has neither control; each state renders itself
+           based on actual session/query state. -->
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- Logged-out header ⇄ logged-in rail (see the redraw-v2 comment near the top of this
+             file). header-logged-out keeps its own permanent `flex`; Tailwind's display
+             utilities are output in a stable internal order so `hidden` always wins over it
+             regardless of source order — same mechanism the empty-state toggle below relies on. -->
+        <button
+          type="button"
+          onclick="document.getElementById('header-logged-out').classList.toggle('hidden');
+                    document.getElementById('rail-logged-in').classList.toggle('hidden');
+                    document.getElementById('rail-logged-in').classList.toggle('flex');
+                    this.textContent = this.textContent.startsWith('Preview') ? 'Back to logged-out view' : 'Preview logged-in view';"
+          class="text-xs font-medium rounded-lg px-3 py-1.5"
+          style="border: 1px solid var(--border); color: var(--muted);"
+        >
+          Preview logged-in view
+        </button>
+        <button
+          type="button"
+          onclick="document.getElementById('directory-grid').classList.toggle('hidden');
+                    document.getElementById('directory-empty').classList.toggle('hidden');
+                    document.getElementById('directory-empty').classList.toggle('flex');
+                    this.textContent = this.textContent.startsWith('Preview') ? 'Back to directory' : 'Preview empty state';"
+          class="text-xs font-medium rounded-lg px-3 py-1.5"
+          style="border: 1px solid var(--border); color: var(--muted);"
+        >
+          Preview empty state
+        </button>
+      </div>
+    </div>
+
+    <!-- User grid — plain list per user-directory-entry-point.md: name, bio, link to profile.
+         No search/filter/pagination, no follow button/counts here (Follow lives on the profile
+         page). 1 col mobile → 2 col tablet → 3 col desktop.
+
+         PERFORMANCE NOTE (not yet a KOS decision, flagging for build time): this page is public,
+         no login required, and the entry-point decision calls for "no pagination logic beyond
+         what Rails gives for free" — i.e. no pager UI. That's compatible with still capping the
+         query itself: the real index action should fetch with a hard `.limit(9)` (e.g.
+         `User.order(:created_at).limit(9)`) rather than `User.all`, so an unauthenticated,
+         un-rate-limited endpoint can't be made to load an unbounded user table. 9 also lines up
+         with this grid's 3-column desktop layout (exactly 3 full rows). This mockup shows 6
+         sample cards for layout purposes only — the 9 cap is a backend query concern, not a
+         layout change. -->
+    <div id="directory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <!-- Card 1 — profile_picture set -->
+      <a
+        href="#"
+        class="rounded-2xl p-5 flex flex-col gap-3"
+        style="background: var(--surface); border: 1px solid var(--border);"
+      >
+        <div class="flex items-center gap-3">
+          <img
+            src="https://i.pravatar.cc/96?img=47"
+            alt=""
+            class="w-12 h-12 rounded-full object-cover"
+          />
+          <span class="font-display text-lg font-semibold">Priya Nair</span>
+        </div>
+        <p class="text-sm bio-clamp" style="color: var(--muted);">
+          Photographer, always chasing golden hour. Currently on a slow trip through the
+          Western Ghats.
+        </p>
+        <span class="text-sm font-medium mt-1" style="color: var(--primary);">View profile →</span>
+      </a>
+
+      <!-- Card 2 — initials avatar fallback (no profile_picture) -->
+      <a
+        href="#"
+        class="rounded-2xl p-5 flex flex-col gap-3"
+        style="background: var(--surface); border: 1px solid var(--border);"
+      >
+        <div class="flex items-center gap-3">
+          <span
+            class="w-12 h-12 rounded-full flex items-center justify-center font-display text-sm font-semibold shrink-0"
+            style="background: var(--secondary); color: var(--on-fill);"
+          >
+            MO
+          </span>
+          <span class="font-display text-lg font-semibold">Marcus Ostrander</span>
+        </div>
+        <p class="text-sm bio-clamp" style="color: var(--muted);">
+          Building things with old wood and older tools. Dad of two, one dog.
+        </p>
+        <span class="text-sm font-medium mt-1" style="color: var(--primary);">View profile →</span>
+      </a>
+
+      <!-- Card 3 — no bio (optional field, per data-model-schema.md) -->
+      <a
+        href="#"
+        class="rounded-2xl p-5 flex flex-col gap-3"
+        style="background: var(--surface); border: 1px solid var(--border);"
+      >
+        <div class="flex items-center gap-3">
+          <span
+            class="w-12 h-12 rounded-full flex items-center justify-center font-display text-sm font-semibold shrink-0"
+            style="background: var(--secondary); color: var(--on-fill);"
+          >
+            JT
+          </span>
+          <span class="font-display text-lg font-semibold">Jun Tanaka</span>
+        </div>
+        <p class="text-sm italic bio-clamp" style="color: var(--muted);">
+          No bio yet.
+        </p>
+        <span class="text-sm font-medium mt-1" style="color: var(--primary);">View profile →</span>
+      </a>
+
+      <!-- Card 4 -->
+      <a
+        href="#"
+        class="rounded-2xl p-5 flex flex-col gap-3"
+        style="background: var(--surface); border: 1px solid var(--border);"
+      >
+        <div class="flex items-center gap-3">
+          <img
+            src="https://i.pravatar.cc/96?img=32"
+            alt=""
+            class="w-12 h-12 rounded-full object-cover"
+          />
+          <span class="font-display text-lg font-semibold">Grace Odhiambo</span>
+        </div>
+        <p class="text-sm bio-clamp" style="color: var(--muted);">
+          Reading one novel a week and telling everyone about it whether they asked or not.
+        </p>
+        <span class="text-sm font-medium mt-1" style="color: var(--primary);">View profile →</span>
+      </a>
+
+      <!-- Card 5 — long bio, exercises the 2-line clamp -->
+      <a
+        href="#"
+        class="rounded-2xl p-5 flex flex-col gap-3"
+        style="background: var(--surface); border: 1px solid var(--border);"
+      >
+        <div class="flex items-center gap-3">
+          <span
+            class="w-12 h-12 rounded-full flex items-center justify-center font-display text-sm font-semibold shrink-0"
+            style="background: var(--secondary); color: var(--on-fill);"
+          >
+            AR
+          </span>
+          <span class="font-display text-lg font-semibold">Ana Rodrigues</span>
+        </div>
+        <p class="text-sm bio-clamp" style="color: var(--muted);">
+          Former line cook turned home baker. I post a lot about sourdough, occasionally about
+          the two cats who supervise all of it, and rarely about anything else — you've been
+          warned.
+        </p>
+        <span class="text-sm font-medium mt-1" style="color: var(--primary);">View profile →</span>
+      </a>
+
+      <!-- Card 6 -->
+      <a
+        href="#"
+        class="rounded-2xl p-5 flex flex-col gap-3"
+        style="background: var(--surface); border: 1px solid var(--border);"
+      >
+        <div class="flex items-center gap-3">
+          <img
+            src="https://i.pravatar.cc/96?img=15"
+            alt=""
+            class="w-12 h-12 rounded-full object-cover"
+          />
+          <span class="font-display text-lg font-semibold">Leo Fischer</span>
+        </div>
+        <p class="text-sm bio-clamp" style="color: var(--muted);">
+          Cycling everywhere, badly. Currently training for a century ride I have no business
+          attempting.
+        </p>
+        <span class="text-sm font-medium mt-1" style="color: var(--primary);">View profile →</span>
+      </a>
+
+    </div>
+
+    <!-- Empty state (zero users — not the seeded demo state, a safety-net edge case) — reuses
+         empty-states.md's decided icon-top/text-below structure and its own stated rule for a
+         state not among its three named rows: name the god moment (I Found My People), and skip
+         the CTA since there's no real next action for a visitor when the directory is empty.
+         Hidden by default (toggle above the grid switches between the two states for review). -->
+    <div id="directory-empty" class="hidden flex-col items-center text-center gap-2 py-20">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10" style="color: var(--muted);">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+      <p class="font-display text-lg font-semibold">No one's here yet</p>
+      <p class="text-sm" style="color: var(--muted);">Check back soon.</p>
+    </div>
+  </main>
+    </div>
+  </div>
+
+</body>
+</html>

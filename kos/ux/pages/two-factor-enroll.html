@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Turn on two-factor authentication — mockup (Phase 2 preview)</title>
+
+<!-- Phase 2 preview, see two-factor-auth-preview.md — NOT committed, not being built now. Reached
+     from security-settings.html's "Turn on two-factor authentication" button (off state).
+
+     Real flow this stands in for: rqrcode renders user.otp_provisioning_uri as a QR image; the
+     mockup below is a hand-drawn placeholder (finder-pattern corners + a fixed module pattern),
+     NOT a real/scannable code — a static mockup can't run rqrcode, and there is nothing to encode
+     for a demo account anyway. The manual-entry secret below it is a fake sample Base32 string,
+     same spirit as every other mockup's sample data.
+
+     Confirming a code here (real flow: server validates it against otp_secret, matching
+     devise-two-factor's own enrollment step) is what actually turns 2FA on and is the moment
+     backup codes get generated and shown once — so submitting continues to
+     two-factor-backup-codes.html, not back to the hub directly.
+
+     Monospace note: the secret key and the code input use Tailwind's default font-mono utility
+     (system monospace stack), not IBM Plex Mono — that font stays reserved for handles/timestamps
+     per typography.md; this reuses the utility class without loading that font.
+
+     God moment check (mockup-guardrails.md): none of god-moments.md's 5 entries — security/
+     account-management infrastructure, same allowance already used for security-settings.html. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — identical tokens to every other mockup. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13;
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display { font-family: 'Sora', sans-serif; }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  a, button, input {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a, button, input { transition: none; }
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail — same shell as security-settings.html. -->
+    <aside class="w-20 shrink-0 sticky top-0 h-screen flex flex-col items-center py-6 gap-2" style="border-right: 1px solid var(--border); background: var(--background);">
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <a href="feed.html" title="Feed" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+        <a href="directory.html" title="Directory" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+        <a href="notifications.html" title="Notifications" class="relative flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+        </a>
+        <!-- Friend requests — new (friend-requests-preview.md), back-ported across every page
+             mockup carrying this rail. Person + checkmark, not Directory's two-person glyph. -->
+        <a href="friend-requests.html" title="Friend requests" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M15 11.5l2 2 4-4.5" />
+          </svg>
+        </a>
+        <a href="messages.html" title="Messages" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+          </svg>
+        </a>
+      </nav>
+
+      <a href="profile.html" title="Your profile" aria-current="page" class="mt-auto mb-2 shrink-0 rounded-full p-0.5" style="background: var(--primary);">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-semibold" style="background: var(--secondary); color: var(--on-fill);">YK</span>
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <main class="max-w-lg mx-auto px-6 py-10">
+        <div class="flex items-center justify-between gap-4 mb-2">
+          <h1 class="font-display text-2xl font-semibold">Turn on two-factor authentication</h1>
+          <a href="security-settings.html" class="text-sm font-medium" style="color: var(--muted);">Cancel</a>
+        </div>
+
+        <p class="text-xs mb-6" style="color: var(--muted);">
+          Preview — not committed yet, see
+          <span class="font-medium" style="color: var(--secondary);">two-factor-auth-preview.md</span>.
+        </p>
+
+        <form class="rounded-2xl p-6" style="background: var(--surface); border: 1px solid var(--border);" novalidate>
+          <div class="flex flex-col gap-6">
+
+            <!-- Step 1: scan -->
+            <div class="flex flex-col gap-3">
+              <p class="text-sm font-medium">
+                1. Scan this code with your authenticator app (like Google Authenticator or Authy)
+              </p>
+
+              <!-- QR placeholder — always white/black regardless of site theme, same reasoning a
+                   photo wouldn't invert: real authenticator apps render actual QR images this way.
+                   Hand-drawn finder-pattern corners + a fixed module pattern, NOT a real/scannable
+                   code — see this file's top comment. -->
+              <div class="rounded-xl p-4 self-start" style="background: #FFFFFF; border: 1px solid var(--border);">
+                <svg viewBox="0 0 21 21" width="176" height="176" shape-rendering="crispEdges">
+                  <rect width="21" height="21" fill="#FFFFFF" />
+                  <!-- top-left finder eye -->
+                  <rect x="0" y="0" width="7" height="7" fill="#000000" />
+                  <rect x="1" y="1" width="5" height="5" fill="#FFFFFF" />
+                  <rect x="2" y="2" width="3" height="3" fill="#000000" />
+                  <!-- top-right finder eye -->
+                  <rect x="14" y="0" width="7" height="7" fill="#000000" />
+                  <rect x="15" y="1" width="5" height="5" fill="#FFFFFF" />
+                  <rect x="16" y="2" width="3" height="3" fill="#000000" />
+                  <!-- bottom-left finder eye -->
+                  <rect x="0" y="14" width="7" height="7" fill="#000000" />
+                  <rect x="1" y="15" width="5" height="5" fill="#FFFFFF" />
+                  <rect x="2" y="16" width="3" height="3" fill="#000000" />
+                  <!-- scattered data modules, decorative only -->
+                  <rect x="9" y="0" width="1" height="1" fill="#000000" /><rect x="11" y="0" width="1" height="1" fill="#000000" />
+                  <rect x="9" y="2" width="1" height="1" fill="#000000" /><rect x="12" y="2" width="1" height="1" fill="#000000" />
+                  <rect x="8" y="4" width="2" height="1" fill="#000000" /><rect x="11" y="4" width="1" height="2" fill="#000000" />
+                  <rect x="9" y="8" width="1" height="2" fill="#000000" /><rect x="11" y="8" width="2" height="1" fill="#000000" />
+                  <rect x="14" y="9" width="1" height="1" fill="#000000" /><rect x="16" y="9" width="2" height="1" fill="#000000" />
+                  <rect x="19" y="9" width="1" height="1" fill="#000000" /><rect x="9" y="10" width="1" height="1" fill="#000000" />
+                  <rect x="12" y="10" width="1" height="2" fill="#000000" /><rect x="0" y="9" width="1" height="1" fill="#000000" />
+                  <rect x="2" y="9" width="2" height="1" fill="#000000" /><rect x="5" y="9" width="1" height="1" fill="#000000" />
+                  <rect x="1" y="11" width="1" height="1" fill="#000000" /><rect x="3" y="11" width="2" height="1" fill="#000000" />
+                  <rect x="6" y="12" width="1" height="1" fill="#000000" /><rect x="9" y="12" width="1" height="1" fill="#000000" />
+                  <rect x="14" y="11" width="1" height="2" fill="#000000" /><rect x="17" y="11" width="1" height="1" fill="#000000" />
+                  <rect x="19" y="12" width="1" height="1" fill="#000000" /><rect x="15" y="14" width="1" height="1" fill="#000000" />
+                  <rect x="17" y="14" width="2" height="1" fill="#000000" /><rect x="20" y="15" width="1" height="1" fill="#000000" />
+                  <rect x="14" y="16" width="1" height="1" fill="#000000" /><rect x="16" y="17" width="1" height="1" fill="#000000" />
+                  <rect x="18" y="17" width="2" height="1" fill="#000000" /><rect x="15" y="19" width="1" height="1" fill="#000000" />
+                  <rect x="17" y="19" width="1" height="1" fill="#000000" /><rect x="19" y="19" width="1" height="1" fill="#000000" />
+                  <rect x="9" y="17" width="1" height="1" fill="#000000" /><rect x="11" y="18" width="1" height="1" fill="#000000" />
+                  <rect x="9" y="20" width="2" height="1" fill="#000000" /><rect x="12" y="20" width="1" height="1" fill="#000000" />
+                </svg>
+              </div>
+
+              <details class="text-sm">
+                <summary class="font-medium cursor-pointer select-none" style="color: var(--primary);">
+                  Can't scan? Enter this key manually
+                </summary>
+                <div class="mt-2 flex items-center justify-between gap-3 rounded-lg px-3 py-2" style="border: 1px solid var(--border);">
+                  <span class="font-mono text-sm tracking-wide" style="color: var(--text);">JBSW Y3DP EHPK 3PXP</span>
+                  <button type="button" onclick="navigator.clipboard && navigator.clipboard.writeText('JBSWY3DPEHPK3PXP')" class="text-xs font-medium" style="color: var(--primary);">
+                    Copy
+                  </button>
+                </div>
+              </details>
+            </div>
+
+            <!-- Step 2: confirm -->
+            <div class="flex flex-col gap-1.5">
+              <label for="totp_code" class="text-sm font-medium">2. Enter the 6-digit code from the app</label>
+              <input
+                id="totp_code"
+                name="totp_code"
+                type="text"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                maxlength="6"
+                placeholder="000000"
+                class="font-mono text-lg tracking-[0.3em] rounded-lg px-3 py-2 w-40 bg-transparent"
+                style="border: 1px solid var(--border); color: var(--text);"
+              />
+              <span class="text-xs" style="color: var(--muted);">Codes refresh every 30 seconds — enter the one currently showing.</span>
+              <!-- Error state example, same plain-text pattern as login.html/signup.html — shown
+                   for reference; a real screen only renders this after a failed confirm. -->
+              <span class="text-xs hidden" style="color: var(--danger);">That code didn't match. Try the next one.</span>
+            </div>
+
+            <div class="flex items-center gap-3 mt-2">
+              <button
+                type="button"
+                onclick="window.location.href='two-factor-backup-codes.html?context=enrolled'"
+                class="font-display text-sm font-semibold rounded-lg px-4 py-2"
+                style="background: var(--primary); color: var(--on-fill);"
+              >
+                Turn on two-factor authentication
+              </button>
+              <a href="security-settings.html" class="text-sm font-medium rounded-lg px-4 py-2" style="border: 1px solid var(--border); color: var(--text);">
+                Cancel
+              </a>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

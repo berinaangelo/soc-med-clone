@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Friend requests — mockup (Phase 2 preview)</title>
+
+<!-- Phase 2 preview, see friend-requests-preview.md — NOT committed, not being built now. Revised
+     2026-09-02: originally this list lived inline in Notifications; moved to its own page + nav
+     icon once the user flagged the real scaling risk of mixing an actionable Accept/Decline list
+     into the same stream as passive "X followed you" rows — a popular account's Notifications
+     would flood with request rows over time. Notifications keeps a lightweight FYI row for both
+     "sent you a friend request" and "accepted your friend request" (see notifications.html); this
+     page is the one and only place Accept/Decline/Cancel actually happen.
+
+     God moment check (mockup-guardrails.md): god-moments.md #1, "Someone Noticed Me" — same job
+     notifications.html does, except accepting a request is the mutual/stronger version of that
+     moment (see this file's own note). Also the closest anything in this KOS gets to #4 ("I'm
+     Part of Something") without Comments existing yet.
+
+     Two sections, per friend-requests-preview.md: Requests (incoming, pending — the actionable
+     list) and Sent (outgoing, pending — cancelable). Row shape reused byte-for-byte from
+     notifications.html's "notice" format (avatar/name link to profile, accent dot, same
+     typography), swapping only the trailing action area. Cast reused from feed.html/
+     notifications.html for continuity. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 display, Inter 400 body, IBM Plex Mono 400
+     for timestamps, same trio as notifications.html since this screen also has handles/timestamps. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — identical tokens to every other mockup. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13;
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display { font-family: 'Sora', sans-serif; }
+  .font-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  a, button {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a, button { transition: none; }
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail — identical to feed.html/notifications.html's, with the new "user-check"
+         icon (friend-requests-preview.md) carrying the current-tab chip here. -->
+    <aside class="w-20 shrink-0 sticky top-0 h-screen flex flex-col items-center py-6 gap-2" style="border-right: 1px solid var(--border); background: var(--background);">
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <a href="feed.html" title="Feed" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+        <a href="directory.html" title="Directory" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+        <a href="notifications.html" title="Notifications" class="relative flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+        </a>
+        <!-- Friend requests — current tab: solid primary chip per iconography.md's Signal Weight
+             rule. New "user-check" icon (friend-requests-preview.md) — deliberately not the
+             two-person glyph Directory already owns one slot away in this same rail. No unread
+             badge, same no-badge precedent Messages already set. -->
+        <a href="friend-requests.html" aria-current="page" title="Friend requests" class="flex items-center justify-center p-1.5 rounded-full" style="background: var(--primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color: var(--on-fill);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M15 11.5l2 2 4-4.5" />
+          </svg>
+        </a>
+        <a href="messages.html" title="Messages" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+          </svg>
+        </a>
+      </nav>
+
+      <a href="profile.html" title="Your profile" class="mt-auto mb-2 shrink-0 rounded-full">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-semibold" style="background: var(--secondary); color: var(--on-fill);">YK</span>
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <main class="max-w-2xl mx-auto px-6 py-10">
+        <div class="flex items-center justify-between gap-4 mb-2">
+          <h1 class="font-display text-2xl font-semibold">Friend requests</h1>
+        </div>
+
+        <p class="text-xs mb-8" style="color: var(--muted);">
+          Preview — not committed yet, see
+          <span class="font-medium" style="color: var(--secondary);">friend-requests-preview.md</span>.
+        </p>
+
+        <!-- Requests — incoming, pending. The actionable list: Accept/Decline live here and only
+             here (friend-requests-preview.md, revised 2026-09-02). -->
+        <section class="mb-10">
+          <h2 class="font-display text-sm font-semibold uppercase tracking-wide mb-3" style="color: var(--muted);">Requests</h2>
+
+          <div id="requests-list" class="flex flex-col gap-3">
+            <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+              <a href="profile.html" class="shrink-0">
+                <span class="w-10 h-10 rounded-full flex items-center justify-center font-display text-sm font-semibold" style="background: var(--secondary); color: var(--on-fill);">JT</span>
+              </a>
+              <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+                <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--accent);"></span>
+                <p class="text-base min-w-0">
+                  <a href="profile.html" class="font-display font-semibold hover:underline">Jun Tanaka</a>
+                  <span> wants to be friends</span>
+                </p>
+              </div>
+              <div class="flex items-center gap-3 shrink-0">
+                <button type="button" onclick="removeRow(this, 'requests')" class="font-display text-sm font-semibold rounded-lg px-3 py-1.5" style="background: var(--primary); color: var(--on-fill);">Accept</button>
+                <button type="button" onclick="removeRow(this, 'requests')" class="text-sm font-medium" style="color: var(--muted);">Decline</button>
+              </div>
+            </article>
+
+            <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+              <a href="profile.html" class="shrink-0">
+                <img src="https://i.pravatar.cc/96?img=32" alt="" class="w-10 h-10 rounded-full object-cover" />
+              </a>
+              <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+                <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--accent);"></span>
+                <p class="text-base min-w-0">
+                  <a href="profile.html" class="font-display font-semibold hover:underline">Grace Odhiambo</a>
+                  <span> wants to be friends</span>
+                </p>
+              </div>
+              <div class="flex items-center gap-3 shrink-0">
+                <button type="button" onclick="removeRow(this, 'requests')" class="font-display text-sm font-semibold rounded-lg px-3 py-1.5" style="background: var(--primary); color: var(--on-fill);">Accept</button>
+                <button type="button" onclick="removeRow(this, 'requests')" class="text-sm font-medium" style="color: var(--muted);">Decline</button>
+              </div>
+            </article>
+          </div>
+
+          <!-- Empty state — same empty-states.md icon-top/text-below structure as notifications.html,
+               no CTA, a wait state not a dead end. New copy, this row isn't one of that file's
+               three already-named rows. -->
+          <div id="requests-empty" class="hidden flex-col items-center text-center gap-2 py-16" style="border: 1px solid var(--border); border-radius: 1rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10" style="color: var(--muted);">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M15 11.5l2 2 4-4.5" />
+            </svg>
+            <p class="font-display text-lg font-semibold">No pending requests</p>
+            <p class="text-sm" style="color: var(--muted);">You'll see it here the moment someone wants to be friends.</p>
+          </div>
+        </section>
+
+        <!-- Sent — outgoing, pending. Cancel only, same row shape. -->
+        <section>
+          <h2 class="font-display text-sm font-semibold uppercase tracking-wide mb-3" style="color: var(--muted);">Sent</h2>
+
+          <div id="sent-list" class="flex flex-col gap-3">
+            <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+              <a href="profile.html" class="shrink-0">
+                <img src="https://i.pravatar.cc/96?img=15" alt="" class="w-10 h-10 rounded-full object-cover" />
+              </a>
+              <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+                <p class="text-base min-w-0">
+                  <a href="profile.html" class="font-display font-semibold hover:underline">Leo Fischer</a>
+                  <span style="color: var(--muted);"> — request pending</span>
+                </p>
+              </div>
+              <button type="button" onclick="removeRow(this, 'sent')" class="text-sm font-medium shrink-0" style="color: var(--muted);">Cancel</button>
+            </article>
+          </div>
+
+          <div id="sent-empty" class="hidden flex-col items-center text-center gap-2 py-16" style="border: 1px solid var(--border); border-radius: 1rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10" style="color: var(--muted);">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M15 11.5l2 2 4-4.5" />
+            </svg>
+            <p class="font-display text-lg font-semibold">No requests sent</p>
+            <p class="text-sm" style="color: var(--muted);">Visit someone's profile and add them as a friend.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Mockup-only — not app UI. Accept/Decline/Cancel all just remove the row and reveal the
+    // section's empty state once it's the last one, same spirit as every other mockup's in-page
+    // mechanics (e.g. profile.html's editPost).
+    function removeRow(button, section) {
+      const row = button.closest('article');
+      const list = document.getElementById(`${section}-list`);
+      row.remove();
+      if (list.children.length === 0) {
+        list.classList.add('hidden');
+        const empty = document.getElementById(`${section}-empty`);
+        empty.classList.remove('hidden');
+        empty.classList.add('flex');
+      }
+    }
+  </script>
+
+</body>
+</html>

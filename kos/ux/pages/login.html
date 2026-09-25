@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Log in — mockup</title>
+
+<!-- God moment check (mockup-guardrails.md): login is supporting infrastructure, not one of the
+     5 god moments itself. Like signup, its job is to be a fast, low-friction gate — this time
+     back to whatever pulled the user in (a fresh feed, "I Can't Stop Checking"). Kept to the 2
+     minimal fields (email, password) on purpose, same speed-and-clarity goal as signup. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 for display, Inter 400 for body.
+     IBM Plex Mono (identity-only: handles/timestamps/follow-notices) is intentionally not
+     loaded — this screen has no handles or timestamps. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — the one hand-authored CSS the guardrails allow:
+     custom properties for tokens, font-family declarations, and the couple of native selectors
+     Tailwind has no utility for. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13; /* dark theme's own background, per color-scheme.md's fill-role rule */
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display {
+    font-family: 'Sora', sans-serif;
+  }
+
+  /* Focus rule (tech-stack.md): every interactive element gets a visible 2px accent outline,
+     2px offset. :focus-visible has no Tailwind utility, so it's hand-authored here. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Motion (tech-stack.md): component-only 150ms ease transitions, dropped for reduced motion. */
+  input,
+  button {
+    transition: border-color 150ms ease, background-color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    input,
+    button {
+      transition: none;
+    }
+  }
+</style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <main class="w-full max-w-sm">
+    <!-- Mockup-only preview toggles — not app UI, same convention as search.html's "Preview
+         logged-in view". Two independent scenarios, both demonstrating a real build's behavior
+         for an account in that state; step 1 below is otherwise unchanged/already-committed MVP
+         markup. -->
+    <div class="flex flex-wrap justify-center gap-2 mb-4">
+      <button
+        type="button"
+        id="tfa-step-toggle"
+        onclick="setLoginStep(document.getElementById('login-step2').classList.contains('hidden'));"
+        class="text-xs font-medium rounded-lg px-3 py-1.5"
+        style="border: 1px solid var(--border); color: var(--muted);"
+      >
+        Preview: this account has 2FA enabled
+      </button>
+      <!-- email-confirmation-preview.md — Devise's confirmable module fails a sign-in with a
+           flash error rather than a second step, unlike 2FA above, so this just reveals the
+           password field's error state instead of switching forms. -->
+      <button
+        type="button"
+        id="unconfirmed-toggle"
+        onclick="toggleUnconfirmed()"
+        class="text-xs font-medium rounded-lg px-3 py-1.5"
+        style="border: 1px solid var(--border); color: var(--muted);"
+      >
+        Preview: this account is unconfirmed
+      </button>
+    </div>
+
+    <form
+      id="login-step1"
+      class="rounded-2xl p-8"
+      style="background: var(--surface); border: 1px solid var(--border);"
+      novalidate
+    >
+      <h1 class="font-display text-2xl font-semibold mb-1">Log in</h1>
+      <p class="text-sm mb-6" style="color: var(--muted);">
+        Welcome back.
+      </p>
+
+      <div class="flex flex-col gap-5">
+        <!-- Email -->
+        <div class="flex flex-col gap-1.5">
+          <label for="email" class="text-sm font-medium">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            required
+            class="rounded-lg px-3 py-2 text-base bg-transparent"
+            style="border: 1px solid var(--border); color: var(--text);"
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="flex flex-col gap-1.5">
+          <div class="flex items-baseline justify-between">
+            <label for="password" class="text-sm font-medium">Password</label>
+            <!-- recoverable module is on (devise-modules.md) — forgot-password needs a way in -->
+            <a href="#" class="text-xs font-medium" style="color: var(--primary);">Forgot password?</a>
+          </div>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            class="rounded-lg px-3 py-2 text-base bg-transparent"
+            style="border: 1px solid var(--border); color: var(--text);"
+          />
+          <!-- Error state example (danger text, same plain-text pattern as signup.html) — shown
+               here for reference; a real screen only renders this after a failed submit. -->
+          <span id="password-error" class="text-xs hidden" style="color: var(--danger);">Incorrect email or password.</span>
+          <!-- Unconfirmed-account error (email-confirmation-preview.md) — same danger-text
+               convention as the error above, plus an adjacent resend link since this is the only
+               way back for that account until the real confirmable-blocked-sign-in flow exists. -->
+          <p id="unconfirmed-error" class="text-xs hidden" style="color: var(--danger);">
+            Please confirm your email before logging in.
+            <a href="email-confirmation-sent.html" class="font-medium" style="color: var(--primary);">Resend confirmation email</a>
+          </p>
+        </div>
+
+        <!-- rememberable module is on (devise-modules.md) -->
+        <label class="flex items-center gap-2 text-sm select-none">
+          <input
+            type="checkbox"
+            name="remember_me"
+            class="rounded"
+            style="accent-color: var(--primary); border: 1px solid var(--border);"
+          />
+          Remember me
+        </label>
+
+        <button
+          type="submit"
+          class="font-display text-sm font-semibold rounded-lg py-2.5 mt-2"
+          style="background: var(--primary); color: var(--on-fill);"
+        >
+          Log in
+        </button>
+      </div>
+    </form>
+
+    <!-- Step 2 — two-factor-auth-preview.md preview, not committed. Same minimal-fields ethos as
+         step 1 above: one input, one primary action, one fallback link, no extra chrome. -->
+    <form
+      id="login-step2"
+      class="hidden rounded-2xl p-8"
+      style="background: var(--surface); border: 1px solid var(--border);"
+      novalidate
+    >
+      <h1 class="font-display text-2xl font-semibold mb-1">Enter your code</h1>
+      <p id="step2-copy" class="text-sm mb-6" style="color: var(--muted);">
+        Open your authenticator app and enter the current code.
+      </p>
+
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label id="step2-label" for="totp_code" class="text-sm font-medium">Code</label>
+          <input
+            id="totp_code"
+            name="totp_code"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            placeholder="000000"
+            class="font-mono text-lg tracking-[0.3em] rounded-lg px-3 py-2 w-40 bg-transparent"
+            style="border: 1px solid var(--border); color: var(--text);"
+          />
+          <!-- Error state example, same plain-text pattern as step 1's password error — shown for
+               reference; a real screen only renders this after a failed verify. -->
+          <span class="text-xs hidden" style="color: var(--danger);">That code didn't match. Try again.</span>
+        </div>
+
+        <button
+          type="button"
+          onclick="window.location.href='feed.html'"
+          class="font-display text-sm font-semibold rounded-lg py-2.5"
+          style="background: var(--primary); color: var(--on-fill);"
+        >
+          Verify
+        </button>
+
+        <div class="flex items-center justify-between text-sm">
+          <button type="button" id="backup-code-toggle" data-mode="totp" onclick="toggleBackupCode()" class="font-medium" style="color: var(--primary);">
+            Use a backup code instead
+          </button>
+          <button type="button" onclick="setLoginStep(false)" class="font-medium" style="color: var(--muted);">
+            Back
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <p class="text-center text-sm mt-6" style="color: var(--muted);">
+      Don't have an account?
+      <a href="#" class="font-medium" style="color: var(--primary);">Sign up</a>
+    </p>
+  </main>
+
+  <script>
+    // Mockup-only — not app UI, same spirit as every other page mockup's preview toggle.
+    function setLoginStep(showStep2) {
+      document.getElementById('login-step1').classList.toggle('hidden', showStep2);
+      document.getElementById('login-step2').classList.toggle('hidden', !showStep2);
+      document.getElementById('tfa-step-toggle').textContent = showStep2
+        ? 'Preview: back to step 1'
+        : 'Preview: this account has 2FA enabled';
+    }
+
+    function toggleUnconfirmed() {
+      const error = document.getElementById('unconfirmed-error');
+      const toggle = document.getElementById('unconfirmed-toggle');
+      const showing = error.classList.toggle('hidden') === false;
+      toggle.textContent = showing
+        ? 'Preview: back to normal'
+        : 'Preview: this account is unconfirmed';
+    }
+
+    function toggleBackupCode() {
+      const input = document.getElementById('totp_code');
+      const label = document.getElementById('step2-label');
+      const copy = document.getElementById('step2-copy');
+      const toggle = document.getElementById('backup-code-toggle');
+      const usingBackup = toggle.dataset.mode === 'backup';
+
+      if (usingBackup) {
+        label.textContent = 'Code';
+        copy.textContent = 'Open your authenticator app and enter the current code.';
+        input.maxLength = 6;
+        input.placeholder = '000000';
+        toggle.textContent = 'Use a backup code instead';
+        toggle.dataset.mode = 'totp';
+      } else {
+        label.textContent = 'Backup code';
+        copy.textContent = "Enter one of the backup codes you saved when you turned on two-factor authentication.";
+        input.maxLength = 9;
+        input.placeholder = '0000-0000';
+        toggle.textContent = 'Use your authenticator app instead';
+        toggle.dataset.mode = 'backup';
+      }
+      input.value = '';
+    }
+  </script>
+
+</body>
+</html>

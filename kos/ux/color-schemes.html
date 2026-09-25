@@ -1,0 +1,774 @@
+<title>Palette Specimen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper: #f0f1f4;
+    --paper-raised: #ffffff;
+    --ink: #1b1d24;
+    --ink-soft: #53566b;
+    --ink-faint: #8a8da3;
+    --rule: #d7d9e2;
+    --accent: #6b5b73;
+    --accent-soft: #efe9f0;
+    --shadow: 0 1px 2px rgba(27,29,36,0.06), 0 8px 24px rgba(27,29,36,0.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper: #14151a;
+      --paper-raised: #1c1e26;
+      --ink: #eceef4;
+      --ink-soft: #a9acc0;
+      --ink-faint: #6c6f85;
+      --rule: #2c2e3a;
+      --accent: #c6b3cf;
+      --accent-soft: #2a2432;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper: #14151a;
+    --paper-raised: #1c1e26;
+    --ink: #eceef4;
+    --ink-soft: #a9acc0;
+    --ink-faint: #6c6f85;
+    --rule: #2c2e3a;
+    --accent: #c6b3cf;
+    --accent-soft: #2a2432;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  *{ box-sizing: border-box; }
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .doc{
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+  h1,h2,h3{
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    font-weight: 500;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .eyebrow{
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* ---- Masthead ---- */
+  .masthead{
+    padding-bottom: 2.75rem;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 3rem;
+  }
+  .masthead h1{
+    font-size: clamp(2.1rem, 5vw, 2.9rem);
+    font-optical-sizing: auto;
+    margin: 0.6rem 0 1rem;
+    letter-spacing: -0.01em;
+  }
+  .masthead p{
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+  }
+  .masthead .meta{
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.75rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+  .masthead .meta span b{ color: var(--ink-soft); font-weight: 500; }
+
+  .lede{
+    max-width: 68ch;
+    color: var(--ink-soft);
+    margin-bottom: 3.5rem;
+  }
+  .lede strong{ color: var(--ink); font-weight: 600; }
+
+  /* ---- Specimen sections ---- */
+  .specimen{
+    margin-bottom: 4.5rem;
+  }
+  .specimen-head{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    align-items: start;
+    margin-bottom: 1.5rem;
+  }
+  .specimen-head h2{
+    font-size: 1.9rem;
+    margin: 0.2rem 0 0.6rem;
+  }
+  .specimen-head .theory{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+  .rationale{
+    max-width: 66ch;
+    color: var(--ink-soft);
+  }
+  .rationale em{ color: var(--ink); font-style: normal; font-weight: 500; }
+
+  .wheel{ flex-shrink: 0; }
+  .wheel-label{
+    text-anchor: middle;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 6.5px;
+    fill: var(--ink-faint);
+  }
+
+  /* Tonal ramp diagram (monochromatic scheme — one hue, no wheel needed) */
+  .ramp{
+    flex-shrink: 0;
+    width: 200px;
+  }
+  .ramp-bar{
+    height: 34px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #52233F, #762D64, #B06DA0, #E8CBDF);
+    position: relative;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+  }
+  .ramp-tick{
+    position: absolute;
+    top: -6px;
+    width: 2px;
+    height: 46px;
+    background: var(--ink);
+    opacity: 0.55;
+  }
+  .ramp-labels{
+    display: flex;
+    justify-content: space-between;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.6rem;
+    color: var(--ink-faint);
+    margin-top: 0.35rem;
+  }
+
+  /* Swatch table */
+  .swatches{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.75rem 0;
+    font-size: 0.88rem;
+  }
+  .swatches th{
+    text-align: left;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 500;
+    padding: 0 0.6rem 0.5rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .swatches td{
+    padding: 0.55rem 0.6rem 0.55rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: middle;
+    color: var(--ink-soft);
+  }
+  .swatches td.role{ color: var(--ink); font-weight: 500; }
+  .swatches td.code{ font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; white-space: nowrap; }
+  .chip{
+    display: inline-block;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 4px;
+    margin-right: 0.55rem;
+    vertical-align: middle;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+  }
+  .swatches-wrap{ overflow-x: auto; }
+
+  .note{
+    background: var(--accent-soft);
+    border-left: 2px solid var(--accent);
+    padding: 0.85rem 1.1rem;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 1.5rem 0 2rem;
+  }
+  .note b{ color: var(--ink); }
+
+  /* ---- Mockup preview (pinned to each scheme's own light presentation) ---- */
+  .mockup-caption{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    margin-bottom: 0.6rem;
+  }
+  .mockup{
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: var(--m-bg);
+    color: var(--m-text);
+    font-family: "IBM Plex Sans", sans-serif;
+  }
+  .mockup[data-scheme="a"]{
+    --m-primary:#CC4919; --m-primary-text:#ffffff;
+    --m-secondary:#E8A530; --m-secondary-text:#2C2421;
+    --m-accent:#CA2B45; --m-accent-text:#ffffff;
+    --m-text:#2C2421; --m-muted:#746863;
+    --m-surface:#F9F7F5; --m-bg:#FBFAF9; --m-border:#EAE3DD;
+  }
+  .mockup[data-scheme="b"]{
+    --m-primary:#38519F; --m-primary-text:#ffffff;
+    --m-secondary:#7A8AB8; --m-secondary-text:#1E2129;
+    --m-accent:#F1BF27; --m-accent-text:#1E2129;
+    --m-text:#1E2129; --m-muted:#636774;
+    --m-surface:#F6F7F9; --m-bg:#F9FAFB; --m-border:#E4E6EC;
+  }
+  .mockup[data-scheme="c"]{
+    --m-primary:#1F7A77; --m-primary-text:#ffffff;
+    --m-secondary:#B5306E; --m-secondary-text:#ffffff;
+    --m-accent:#E87917; --m-accent-text:#1F2828;
+    --m-text:#1F2828; --m-muted:#637473;
+    --m-surface:#F3F7F7; --m-bg:#F9FBFA; --m-border:#E1EAE9;
+  }
+  .mockup[data-scheme="d"]{
+    --m-primary:#602BAB; --m-primary-text:#ffffff;
+    --m-secondary:#2B824F; --m-secondary-text:#ffffff;
+    --m-accent:#EE7C2B; --m-accent-text:#25222B;
+    --m-text:#25222B; --m-muted:#6A6374;
+    --m-surface:#F7F6F9; --m-bg:#FAF9FB; --m-border:#EBE7F0;
+  }
+  .mockup[data-scheme="e"]{
+    --m-primary:#762D64; --m-primary-text:#ffffff;
+    --m-secondary:#9F568D; --m-secondary-text:#ffffff;
+    --m-accent:#CA21A0; --m-accent-text:#ffffff;
+    --m-text:#2B2229; --m-muted:#74636F;
+    --m-surface:#F9F6F8; --m-bg:#FAF9FA; --m-border:#EFE4EB;
+  }
+  .m-nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.1rem;
+    background: var(--m-primary);
+    color: var(--m-primary-text);
+  }
+  .m-nav .m-brand{ font-family: "Fraunces", serif; font-weight: 600; font-size: 1.05rem; }
+  .m-nav .m-links{ display: flex; align-items: center; gap: 1.1rem; font-size: 0.82rem; }
+  .m-nav .m-links span{ opacity: 0.85; }
+  .m-bell{
+    position: relative;
+    display: inline-flex;
+    width: 1.6rem; height: 1.6rem;
+    align-items: center; justify-content: center;
+  }
+  .m-bell::before{ content:"🔔"; font-size: 0.85rem; filter: grayscale(1) brightness(3); opacity:0.9; }
+  .m-badge{
+    position: absolute; top: -2px; right: -2px;
+    background: var(--m-accent); color: var(--m-accent-text);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.58rem; font-weight: 500;
+    width: 1.05rem; height: 1.05rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .m-body{ padding: 1.1rem; display: flex; flex-direction: column; gap: 0.85rem; }
+  .m-toast{
+    display: flex; align-items: center; gap: 0.65rem;
+    background: var(--m-accent); color: var(--m-accent-text);
+    padding: 0.6rem 0.85rem; border-radius: 8px;
+    font-size: 0.82rem; font-weight: 500;
+  }
+  .m-toast .dot{ width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; opacity: 0.6; flex-shrink:0; }
+  .m-card{
+    background: var(--m-surface);
+    border: 1px solid var(--m-border);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+  }
+  .m-card-head{ display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.55rem; }
+  .m-avatar{
+    width: 1.9rem; height: 1.9rem; border-radius: 50%;
+    background: var(--m-secondary); color: var(--m-secondary-text);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 600; flex-shrink: 0;
+  }
+  .m-name{ font-size: 0.86rem; font-weight: 600; }
+  .m-time{ font-size: 0.72rem; color: var(--m-muted); }
+  .m-post{ font-size: 0.88rem; color: var(--m-text); margin-bottom: 0.75rem; }
+  .m-actions{ display: flex; align-items: center; gap: 0.6rem; }
+  .m-follow{
+    background: var(--m-primary); color: var(--m-primary-text);
+    border: none; border-radius: 999px;
+    padding: 0.35rem 0.85rem; font-size: 0.76rem; font-weight: 600;
+    font-family: inherit;
+  }
+  .m-link{ font-size: 0.76rem; color: var(--m-muted); }
+
+  /* ---- Closing comparison ---- */
+  .closing{
+    margin-top: 4rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  .closing h2{ font-size: 1.6rem; margin-bottom: 1rem; }
+  .compare{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+    margin: 1.5rem 0 2rem;
+  }
+  .compare th, .compare td{
+    text-align: left;
+    padding: 0.6rem 0.9rem 0.6rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .compare th{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-faint); font-weight: 500;
+  }
+  .compare td.name{ color: var(--ink); font-weight: 500; }
+  .recommend{
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow);
+  }
+  .recommend .eyebrow{ margin-bottom: 0.4rem; }
+  .recommend p{ color: var(--ink-soft); }
+  .recommend p:last-child{ margin-bottom: 0; }
+  .recommend strong{ color: var(--ink); }
+
+  footer{
+    margin-top: 3.5rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 620px){
+    .specimen-head{ grid-template-columns: 1fr; }
+    .wheel{ justify-self: start; }
+    .m-nav .m-links span:not(:last-child){ display: none; }
+  }
+</style>
+
+<div class="doc">
+
+  <header class="masthead">
+    <p class="eyebrow">UX — Visual Identity</p>
+    <h1>Palette Specimen</h1>
+    <p>Five color-theory candidates for the Friendster Rebuild's visual identity — a
+      text-first, follow-based community built around one payoff: <strong>feeling noticed</strong>
+      when someone you know responds. Each palette below picks a different harmony (analogous,
+      complementary, split-complementary, triadic, monochromatic) and carries it through a real
+      nav bar, post card, and follow/notification moment so it can be judged in context, not as
+      loose swatches.</p>
+    <div class="meta">
+      <span>Project: <b>soc-med-clone</b></span>
+      <span>Stack: <b>Rails 8 · Tailwind</b></span>
+      <span>Stage: <b>pre-build UX pass</b></span>
+    </div>
+  </header>
+
+  <p class="lede">Every option deliberately avoids the default social-network blue — it's the
+    one color every network in this space already reaches for, and the brief calls for
+    something that reads as its own thing from the first screen. Hex values below are computed
+    from the stated HSL, and the contrast ratios are measured, not eyeballed — <em>text on a
+    filled button uses whichever of white/dark ink actually clears WCAG AA</em>, matching the
+    convention already set for this studio's other projects.</p>
+
+  <!-- ============ SCHEME A ============ -->
+  <section class="specimen">
+    <div class="specimen-head">
+      <div>
+        <p class="theory">Analogous — 16° / 38° / 350°</p>
+        <h2>Warm Signal</h2>
+      </div>
+      <svg class="wheel" width="120" height="120" viewBox="0 0 180 180">
+        <circle cx="90" cy="90" r="68" fill="none" stroke="var(--rule)" stroke-width="1"/>
+        <line x1="90" y1="22" x2="90" y2="158" stroke="var(--rule)" stroke-width="0.5"/>
+        <line x1="22" y1="90" x2="158" y2="90" stroke="var(--rule)" stroke-width="0.5"/>
+        <circle cx="155.4" cy="108.7" r="7" fill="#CC4919"/>
+        <circle cx="143.6" cy="131.9" r="7" fill="#E8A530"/>
+        <circle cx="157.0" cy="78.2" r="7" fill="#CA2B45"/>
+        <text class="wheel-label" x="90" y="14">90</text>
+        <text class="wheel-label" x="90" y="172">270</text>
+      </svg>
+    </div>
+    <p class="rationale">Three neighboring hues on the wheel — coral, amber, rose — kept within a
+      70° arc. Nothing here fights anything else, which suits a feed meant to be sat in and
+      scrolled, not alarmed by. <em>Coral carries the brand and primary actions</em>; amber
+      breaks in for secondary buttons and badges; rose is reserved for the follow/notification
+      moment, close enough in temperature to feel like part of the family rather than a jarring
+      alert color.</p>
+
+    <div class="swatches-wrap">
+      <table class="swatches">
+        <thead><tr><th>Role</th><th>HSL</th><th>Hex</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td class="role"><span class="chip" style="background:#CC4919"></span>Primary</td><td class="code">16° 78% 45%</td><td class="code">#CC4919</td><td>Nav, brand, primary buttons</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#E8A530"></span>Secondary</td><td class="code">38° 80% 55%</td><td class="code">#E8A530</td><td>Secondary buttons, badges</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#CA2B45"></span>Accent</td><td class="code">350° 65% 48%</td><td class="code">#CA2B45</td><td>Follow CTA, notification badge</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#30A65B"></span>Success</td><td class="code">142° 55% 42%</td><td class="code">#30A65B</td><td>Confirmations</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#D0252A"></span>Danger</td><td class="code">358° 70% 48%</td><td class="code">#D0252A</td><td>Errors, delete</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#2C2421"></span>Text</td><td class="code">20° 15% 15%</td><td class="code">#2C2421</td><td>Body copy</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#FBFAF9;box-shadow:inset 0 0 0 1px #ccc"></span>Background</td><td class="code">30° 20% 98%</td><td class="code">#FBFAF9</td><td>Page ground</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note"><b>Contrast:</b> white on Primary measures 4.63:1, white on Accent 5.33:1 —
+      both clear AA at any text size. Text on Background is 14.58:1. Only flag: Secondary needs
+      dark ink, not white (white measures 2.13:1) — already reflected above.</div>
+
+    <p class="mockup-caption">↓ shown in this scheme's own light mode</p>
+    <div class="mockup" data-scheme="a">
+      <div class="m-nav">
+        <span class="m-brand">Circle</span>
+        <div class="m-links"><span>Feed</span><span>Directory</span>
+          <span class="m-bell"><span class="m-badge">2</span></span>
+        </div>
+      </div>
+      <div class="m-body">
+        <div class="m-toast"><span class="dot"></span>Maya started following you</div>
+        <div class="m-card">
+          <div class="m-card-head">
+            <div class="m-avatar">DR</div>
+            <div><div class="m-name">Deon R.</div><div class="m-time">3h ago</div></div>
+          </div>
+          <p class="m-post">Just dug up my old profile pic from 2004. We've come a long way.</p>
+          <div class="m-actions"><button class="m-follow">Follow</button><span class="m-link">12 followers</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHEME B ============ -->
+  <section class="specimen">
+    <div class="specimen-head">
+      <div>
+        <p class="theory">Complementary — 225° ↔ 45°</p>
+        <h2>Indigo &amp; Ember</h2>
+      </div>
+      <svg class="wheel" width="120" height="120" viewBox="0 0 180 180">
+        <circle cx="90" cy="90" r="68" fill="none" stroke="var(--rule)" stroke-width="1"/>
+        <line x1="90" y1="22" x2="90" y2="158" stroke="var(--rule)" stroke-width="0.5"/>
+        <line x1="22" y1="90" x2="158" y2="90" stroke="var(--rule)" stroke-width="0.5"/>
+        <line x1="41.9" y1="41.9" x2="138.1" y2="138.1" stroke="var(--accent)" stroke-width="0.75" stroke-dasharray="2 3"/>
+        <circle cx="41.9" cy="41.9" r="7" fill="#38519F"/>
+        <circle cx="138.1" cy="138.1" r="7" fill="#F1BF27"/>
+        <text class="wheel-label" x="90" y="14">90</text>
+        <text class="wheel-label" x="90" y="172">270</text>
+      </svg>
+    </div>
+    <p class="rationale">A true pair straight across the wheel. <em>Indigo is the everyday
+      surface</em> — calm enough to read a feed against for a while — and it has exactly one
+      job outside that: carry the follow/notification moment in amber, the one color in this
+      palette indigo has no relationship to. That's the point of picking complements here — the
+      "someone noticed you" moment gets a color nothing else on the page is allowed to use.</p>
+
+    <div class="swatches-wrap">
+      <table class="swatches">
+        <thead><tr><th>Role</th><th>HSL</th><th>Hex</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td class="role"><span class="chip" style="background:#38519F"></span>Primary</td><td class="code">225° 48% 42%</td><td class="code">#38519F</td><td>Nav, brand, links</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#7A8AB8"></span>Secondary</td><td class="code">225° 30% 60%</td><td class="code">#7A8AB8</td><td>Muted UI, borders</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#F1BF27"></span>Accent</td><td class="code">45° 88% 55%</td><td class="code">#F1BF27</td><td>Follow CTA, notification badge</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#339966"></span>Success</td><td class="code">150° 50% 40%</td><td class="code">#339966</td><td>Confirmations</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#CE2735"></span>Danger</td><td class="code">355° 68% 48%</td><td class="code">#CE2735</td><td>Errors, delete</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#1E2129"></span>Text</td><td class="code">225° 15% 14%</td><td class="code">#1E2129</td><td>Body copy</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#F9FAFB;box-shadow:inset 0 0 0 1px #ccc"></span>Background</td><td class="code">220° 15% 98%</td><td class="code">#F9FAFB</td><td>Page ground</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note"><b>Contrast:</b> white on Primary measures 7.38:1 — the strongest button
+      pairing of the three. Dark ink on Accent measures 9.37:1; white on Accent fails badly
+      (1.72:1), so the badge and CTA text above use dark ink, not white. Text on Background is
+      15.40:1.</div>
+
+    <p class="mockup-caption">↓ shown in this scheme's own light mode</p>
+    <div class="mockup" data-scheme="b">
+      <div class="m-nav">
+        <span class="m-brand">Circle</span>
+        <div class="m-links"><span>Feed</span><span>Directory</span>
+          <span class="m-bell"><span class="m-badge">2</span></span>
+        </div>
+      </div>
+      <div class="m-body">
+        <div class="m-toast"><span class="dot"></span>Maya started following you</div>
+        <div class="m-card">
+          <div class="m-card-head">
+            <div class="m-avatar">DR</div>
+            <div><div class="m-name">Deon R.</div><div class="m-time">3h ago</div></div>
+          </div>
+          <p class="m-post">Just dug up my old profile pic from 2004. We've come a long way.</p>
+          <div class="m-actions"><button class="m-follow">Follow</button><span class="m-link">12 followers</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHEME C ============ -->
+  <section class="specimen">
+    <div class="specimen-head">
+      <div>
+        <p class="theory">Split-complementary — 178° base / 332° · 28°</p>
+        <h2>Retro Teal</h2>
+      </div>
+      <svg class="wheel" width="120" height="120" viewBox="0 0 180 180">
+        <circle cx="90" cy="90" r="68" fill="none" stroke="var(--rule)" stroke-width="1"/>
+        <line x1="90" y1="22" x2="90" y2="158" stroke="var(--rule)" stroke-width="0.5"/>
+        <line x1="22" y1="90" x2="158" y2="90" stroke="var(--rule)" stroke-width="0.5"/>
+        <circle cx="22.0" cy="92.4" r="7" fill="#1F7A77"/>
+        <circle cx="150.0" cy="58.1" r="7" fill="#B5306E"/>
+        <circle cx="150.0" cy="121.9" r="7" fill="#E87917"/>
+        <text class="wheel-label" x="90" y="14">90</text>
+        <text class="wheel-label" x="90" y="172">270</text>
+      </svg>
+    </div>
+    <p class="rationale">Teal anchors the brand, then instead of jumping straight to its
+      complement (a plain coral-red), the two hues flanking that complement do the work —
+      magenta and orange. It's the same family of teal-plus-warm-accent that early web social
+      networks leaned on, without literally reusing anyone's brand colors, and it gives three
+      distinct roles instead of two: <em>teal for the everyday chrome, magenta for anything
+      "premium" or personal (profile accents), orange for the single loudest action on
+      screen</em>.</p>
+
+    <div class="swatches-wrap">
+      <table class="swatches">
+        <thead><tr><th>Role</th><th>HSL</th><th>Hex</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td class="role"><span class="chip" style="background:#1F7A77"></span>Primary</td><td class="code">178° 60% 30%</td><td class="code">#1F7A77</td><td>Nav, brand, links</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#B5306E"></span>Secondary</td><td class="code">332° 58% 45%</td><td class="code">#B5306E</td><td>Profile accents, avatars</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#E87917"></span>Accent</td><td class="code">28° 82% 50%</td><td class="code">#E87917</td><td>Follow CTA, notification badge</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#309159"></span>Success</td><td class="code">145° 50% 38%</td><td class="code">#309159</td><td>Confirmations</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#CE272D"></span>Danger</td><td class="code">358° 68% 48%</td><td class="code">#CE272D</td><td>Errors, delete</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#1F2828"></span>Text</td><td class="code">178° 12% 14%</td><td class="code">#1F2828</td><td>Body copy</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#F9FBFA;box-shadow:inset 0 0 0 1px #ccc"></span>Background</td><td class="code">178° 12% 98%</td><td class="code">#F9FBFA</td><td>Page ground</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note"><b>Contrast:</b> white on Primary measures 5.11:1, white on Secondary
+      5.81:1. Accent needs dark ink, not white (white on Accent is 2.93:1 vs. 5.62:1 for dark) —
+      already reflected above. One soft spot: Success on Background is only 3.80:1 as running
+      text, fine for an icon/badge fill but not for status text set at body size.</div>
+
+    <p class="mockup-caption">↓ shown in this scheme's own light mode</p>
+    <div class="mockup" data-scheme="c">
+      <div class="m-nav">
+        <span class="m-brand">Circle</span>
+        <div class="m-links"><span>Feed</span><span>Directory</span>
+          <span class="m-bell"><span class="m-badge">2</span></span>
+        </div>
+      </div>
+      <div class="m-body">
+        <div class="m-toast"><span class="dot"></span>Maya started following you</div>
+        <div class="m-card">
+          <div class="m-card-head">
+            <div class="m-avatar">DR</div>
+            <div><div class="m-name">Deon R.</div><div class="m-time">3h ago</div></div>
+          </div>
+          <p class="m-post">Just dug up my old profile pic from 2004. We've come a long way.</p>
+          <div class="m-actions"><button class="m-follow">Follow</button><span class="m-link">12 followers</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHEME D ============ -->
+  <section class="specimen">
+    <div class="specimen-head">
+      <div>
+        <p class="theory">Triadic — 265° / 145° / 25°</p>
+        <h2>Recess</h2>
+      </div>
+      <svg class="wheel" width="120" height="120" viewBox="0 0 180 180">
+        <circle cx="90" cy="90" r="68" fill="none" stroke="var(--rule)" stroke-width="1"/>
+        <line x1="90" y1="22" x2="90" y2="158" stroke="var(--rule)" stroke-width="0.5"/>
+        <line x1="22" y1="90" x2="158" y2="90" stroke="var(--rule)" stroke-width="0.5"/>
+        <polygon points="84.1,22.3 34.3,129.0 151.6,118.7" fill="none" stroke="var(--accent)" stroke-width="0.75" stroke-dasharray="2 3"/>
+        <circle cx="84.1" cy="22.3" r="7" fill="#602BAB"/>
+        <circle cx="34.3" cy="129.0" r="7" fill="#2B824F"/>
+        <circle cx="151.6" cy="118.7" r="7" fill="#EE7C2B"/>
+        <text class="wheel-label" x="90" y="14">90</text>
+        <text class="wheel-label" x="90" y="172">270</text>
+      </svg>
+    </div>
+    <p class="rationale">The one harmony not tried yet: three hues spaced evenly around the
+      wheel instead of clustered or opposed. Violet, green, and orange, each 120° apart — the
+      most playful option of the five, closer to a friend-group's mixed energy than a single
+      brand mood. <em>Violet carries the brand and everyday chrome, green is the follower/growth
+      signal, orange is reserved for the one loudest action on any given screen.</em> The trade
+      with a triad this vivid is discipline — it reads as fun exactly as long as no fourth color
+      sneaks in.</p>
+
+    <div class="swatches-wrap">
+      <table class="swatches">
+        <thead><tr><th>Role</th><th>HSL</th><th>Hex</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td class="role"><span class="chip" style="background:#602BAB"></span>Primary</td><td class="code">265° 60% 42%</td><td class="code">#602BAB</td><td>Nav, brand, primary buttons</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#2B824F"></span>Secondary</td><td class="code">145° 50% 34%</td><td class="code">#2B824F</td><td>Follower counts, growth states</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#EE7C2B"></span>Accent</td><td class="code">25° 85% 55%</td><td class="code">#EE7C2B</td><td>Follow CTA, notification badge</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#2E8A54"></span>Success</td><td class="code">145° 50% 36%</td><td class="code">#2E8A54</td><td>Confirmations</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#CE272D"></span>Danger</td><td class="code">358° 68% 48%</td><td class="code">#CE272D</td><td>Errors, delete</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#25222B"></span>Text</td><td class="code">265° 12% 15%</td><td class="code">#25222B</td><td>Body copy</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#FAF9FB;box-shadow:inset 0 0 0 1px #ccc"></span>Background</td><td class="code">265° 14% 98%</td><td class="code">#FAF9FB</td><td>Page ground</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note"><b>Contrast:</b> white on Primary measures 8.64:1, white on Secondary
+      4.76:1 — both clear AA. Accent needs dark ink, not white (white is 2.78:1 vs. 5.63:1 for
+      dark) — already reflected above. Success at 4.30:1 with white text is a hair under body-text
+      AA but well past the 3:1 large/UI threshold a badge or icon fill needs.</div>
+
+    <p class="mockup-caption">↓ shown in this scheme's own light mode</p>
+    <div class="mockup" data-scheme="d">
+      <div class="m-nav">
+        <span class="m-brand">Circle</span>
+        <div class="m-links"><span>Feed</span><span>Directory</span>
+          <span class="m-bell"><span class="m-badge">2</span></span>
+        </div>
+      </div>
+      <div class="m-body">
+        <div class="m-toast"><span class="dot"></span>Maya started following you</div>
+        <div class="m-card">
+          <div class="m-card-head">
+            <div class="m-avatar">DR</div>
+            <div><div class="m-name">Deon R.</div><div class="m-time">3h ago</div></div>
+          </div>
+          <p class="m-post">Just dug up my old profile pic from 2004. We've come a long way.</p>
+          <div class="m-actions"><button class="m-follow">Follow</button><span class="m-link">12 followers</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHEME E ============ -->
+  <section class="specimen">
+    <div class="specimen-head">
+      <div>
+        <p class="theory">Monochromatic — 315°, tonal only</p>
+        <h2>Single Thread</h2>
+      </div>
+      <div class="ramp">
+        <div class="ramp-bar">
+          <span class="ramp-tick" style="left:20%"></span>
+          <span class="ramp-tick" style="left:57%"></span>
+          <span class="ramp-tick" style="left:80%"></span>
+        </div>
+        <div class="ramp-labels"><span>32% L</span><span>46% L</span><span>56% L</span></div>
+      </div>
+    </div>
+    <p class="rationale">No second or third hue at all — one plum, carried from a near-black
+      shade up to a pale tint, with role built entirely from lightness and saturation instead of
+      hue contrast. The most editorial and the calmest of the five: nothing on screen competes
+      with anything else for attention by color alone, which suits a text-first app that wants
+      the words to be the loudest thing on the page. <em>The honest trade: the follow/notification
+      moment can't lean on a hue jump to grab the eye</em> — it has to earn attention with
+      saturation, weight, or motion instead.</p>
+
+    <div class="swatches-wrap">
+      <table class="swatches">
+        <thead><tr><th>Role</th><th>HSL</th><th>Hex</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td class="role"><span class="chip" style="background:#762D64"></span>Primary</td><td class="code">315° 45% 32%</td><td class="code">#762D64</td><td>Nav, brand, primary buttons</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#9F568D"></span>Secondary</td><td class="code">315° 30% 48%</td><td class="code">#9F568D</td><td>Secondary UI, tags, secondary text</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#CA21A0"></span>Accent</td><td class="code">315° 72% 46%</td><td class="code">#CA21A0</td><td>Follow CTA, notification badge</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#2D764B"></span>Success</td><td class="code">145° 45% 32%</td><td class="code">#2D764B</td><td>Confirmations (only non-hue exception)</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#BE2D39"></span>Danger</td><td class="code">355° 62% 46%</td><td class="code">#BE2D39</td><td>Errors, delete (only non-hue exception)</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#2B2229"></span>Text</td><td class="code">315° 12% 15%</td><td class="code">#2B2229</td><td>Body copy</td></tr>
+          <tr><td class="role"><span class="chip" style="background:#FAF9FA;box-shadow:inset 0 0 0 1px #ccc"></span>Background</td><td class="code">315° 10% 98%</td><td class="code">#FAF9FA</td><td>Page ground</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note"><b>Contrast:</b> white on Primary measures 9.01:1, white on Accent 4.96:1.
+      Secondary and Success were both tuned darker from their first pass (Secondary 56%→48% L,
+      Success 36%→32% L) after the first cut only cleared the 3:1 large/UI bar, not the 4.5:1
+      body-text bar — white on Secondary is now 5.01:1, white on Success 5.52:1, both full AA.
+      Success and Danger still break the single-hue rule on purpose — status color has to stay
+      recognizable, not on-brand.</div>
+
+    <p class="mockup-caption">↓ shown in this scheme's own light mode</p>
+    <div class="mockup" data-scheme="e">
+      <div class="m-nav">
+        <span class="m-brand">Circle</span>
+        <div class="m-links"><span>Feed</span><span>Directory</span>
+          <span class="m-bell"><span class="m-badge">2</span></span>
+        </div>
+      </div>
+      <div class="m-body">
+        <div class="m-toast"><span class="dot"></span>Maya started following you</div>
+        <div class="m-card">
+          <div class="m-card-head">
+            <div class="m-avatar">DR</div>
+            <div><div class="m-name">Deon R.</div><div class="m-time">3h ago</div></div>
+          </div>
+          <p class="m-post">Just dug up my old profile pic from 2004. We've come a long way.</p>
+          <div class="m-actions"><button class="m-follow">Follow</button><span class="m-link">12 followers</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CLOSING ============ -->
+  <div class="closing">
+    <h2>At a glance</h2>
+    <div class="swatches-wrap">
+      <table class="compare">
+        <thead><tr><th>Scheme</th><th>Harmony</th><th>Mood</th><th>Strongest CTA contrast</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Warm Signal</td><td>Analogous</td><td>Human, cohesive, low-friction reading</td><td>5.33:1 (Accent)</td></tr>
+          <tr><td class="name">Indigo &amp; Ember</td><td>Complementary</td><td>Calm surface, sharp notification pop</td><td>7.38:1 (Primary)</td></tr>
+          <tr><td class="name">Retro Teal</td><td>Split-complementary</td><td>Distinct, nods to the era, three real roles</td><td>5.81:1 (Secondary)</td></tr>
+          <tr><td class="name">Recess</td><td>Triadic</td><td>Playful, mixed friend-group energy</td><td>8.64:1 (Primary)</td></tr>
+          <tr><td class="name">Single Thread</td><td>Monochromatic</td><td>Calm, editorial, lets the words lead</td><td>9.01:1 (Primary)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="recommend">
+      <p class="eyebrow">Lean</p>
+      <p><strong>Retro Teal</strong> is still the strongest fit on brief. This is a <em>Friendster
+        rebuild</em> — a nod to that era of the social web is on-theme in a way most of the
+        others aren't, and teal-plus-warm-accent gives Secondary a real job (profile identity,
+        not just "the other button color") that a tightly-clustered analogous set can't support
+        as cleanly.</p>
+      <p><strong>Indigo &amp; Ember</strong> is the safer pick if the "feel noticed" moment
+        should read as unmistakably separate from everything else on screen — true complements
+        give that contrast no other harmony here can match, at the cost of the retro identity.</p>
+      <p><strong>Recess</strong> is the one worth a second look if the product should feel more
+        like a group of friends than a brand — it's the most vivid option here, and the most
+        demanding to keep disciplined as the app grows past five UI colors. <strong>Single
+        Thread</strong> is the opposite bet: the most restrained and text-first of the five, at
+        the cost of a notification moment that has to work harder than a hue jump to get noticed.</p>
+      <p>All five pass AA on every text/fill pairing actually used above. Once one is chosen,
+        it graduates to a <code>kos/decisions/ux/color-scheme.md</code> decision file — matching
+        how bus-reservation recorded its own palette call, dark-mode variant included at that
+        stage, not this one.</p>
+    </div>
+  </div>
+
+  <footer>Friendster Rebuild · UX pass · kos/ux/color-schemes.html</footer>
+
+</div>

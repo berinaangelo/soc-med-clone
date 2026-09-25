@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Confirm email — mockup (Phase 2 preview)</title>
+
+<!-- Phase 2 preview, see email-confirmation-preview.md — NOT committed, not being built now.
+     This is the page the emailed confirmation link actually lands on (Devise confirmable module,
+     devise-modules.md/email-confirmation-preview.md) — the counterpart to
+     email-confirmation-sent.html, which is the "we sent it" pending state shown right after
+     signup. Carries a hidden confirmation_token field, same pattern as reset-password.html's
+     hidden reset_password_token.
+
+     One file, two contexts, mockup-only via ?context= (no real routing needed for a static
+     page) — exact mechanism as two-factor-backup-codes.html's ?context= toggle:
+     - default / ?context=success — link was valid, account is now confirmed.
+     - ?context=expired — link had already expired (Devise's confirmable tokens expire), single
+       email field + "Resend confirmation email" to get a new one, reusing forgot-password.html's
+       single-field form shape.
+
+     God moment check (mockup-guardrails.md): none of god-moments.md's 5 entries — supporting
+     infrastructure, same allowance as the rest of the auth chain (signup/login/forgot-password/
+     email-confirmation-sent). -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 for display, Inter 400 for body.
+     IBM Plex Mono (identity-only: handles/timestamps/follow-notices) is intentionally not
+     loaded — this screen has no handles or timestamps. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — identical tokens to every other mockup, plus
+     --success for the confirmed state (same addition security-settings.html already made for
+     its 2FA-on status dot). */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --success: #2D764B;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --success: #59C084;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13; /* dark theme's own background, per color-scheme.md's fill-role rule */
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display {
+    font-family: 'Sora', sans-serif;
+  }
+
+  /* Focus rule (tech-stack.md): every interactive element gets a visible 2px accent outline,
+     2px offset. :focus-visible has no Tailwind utility, so it's hand-authored here. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Motion (tech-stack.md): component-only 150ms ease transitions, dropped for reduced motion. */
+  a,
+  button,
+  input {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button,
+    input {
+      transition: none;
+    }
+  }
+</style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <main class="w-full max-w-sm">
+    <div
+      class="rounded-2xl p-8 text-center"
+      style="background: var(--surface); border: 1px solid var(--border);"
+    >
+      <p class="text-xs mb-4" style="color: var(--muted);">
+        Preview — not committed yet, see
+        <span class="font-medium" style="color: var(--secondary);">email-confirmation-preview.md</span>.
+      </p>
+
+      <!-- Devise's confirmation link carries the confirmation_token as a query param on the real
+           GET link, not a form field — kept here as a hidden input for shape/consistency with
+           reset-password.html's hidden reset_password_token, even though nothing here submits. -->
+      <input type="hidden" name="confirmation_token" value="" />
+
+      <!-- Success state (default / ?context=success) -->
+      <div id="state-success">
+        <!-- Checkmark icon (outline, --success token) — Lucide circle-check geometry, plain
+             circle chip per iconography.md's Signal Weight rule (solid chip only for state). -->
+        <div class="mx-auto mb-5 w-14 h-14 rounded-full flex items-center justify-center" style="background: var(--background);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6" style="color: var(--success);">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        </div>
+
+        <h1 class="font-display text-2xl font-semibold mb-2">Email confirmed</h1>
+        <p class="text-sm mb-6" style="color: var(--muted);">
+          Your account is active. You can log in now.
+        </p>
+
+        <a
+          href="login.html"
+          class="font-display text-sm font-semibold rounded-lg py-2.5 w-full inline-block"
+          style="background: var(--primary); color: var(--on-fill);"
+        >
+          Log in
+        </a>
+      </div>
+
+      <!-- Expired state (?context=expired) — hidden by default, shown by the script below. -->
+      <div id="state-expired" class="hidden">
+        <!-- Expired/invalid icon (outline, --danger token) — Lucide circle-x geometry. -->
+        <div class="mx-auto mb-5 w-14 h-14 rounded-full flex items-center justify-center" style="background: var(--background);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6" style="color: var(--danger);">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m15 9-6 6" />
+            <path d="m9 9 6 6" />
+          </svg>
+        </div>
+
+        <h1 class="font-display text-2xl font-semibold mb-2">This link has expired</h1>
+        <p class="text-sm mb-6" style="color: var(--muted);">
+          Confirmation links expire for security. Enter your email and we'll send a new one.
+        </p>
+
+        <form class="flex flex-col gap-4 text-left" novalidate>
+          <div class="flex flex-col gap-1.5">
+            <label for="email" class="text-sm font-medium">Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              class="rounded-lg px-3 py-2 text-base bg-transparent"
+              style="border: 1px solid var(--border); color: var(--text);"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="font-display text-sm font-semibold rounded-lg py-2.5"
+            style="background: var(--primary); color: var(--on-fill);"
+          >
+            Resend confirmation email
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <p class="text-center text-sm mt-6" style="color: var(--muted);">
+      Wrong account?
+      <a href="login.html" class="font-medium" style="color: var(--primary);">Back to log in</a>
+    </p>
+  </main>
+
+  <script>
+    // Mockup-only — not app UI. Reads ?context= to switch between the confirmed and expired
+    // states, same mechanism as two-factor-backup-codes.html's ?context= toggle.
+    const context = new URLSearchParams(window.location.search).get('context') || 'success';
+
+    if (context === 'expired') {
+      document.getElementById('state-success').classList.add('hidden');
+      document.getElementById('state-expired').classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>

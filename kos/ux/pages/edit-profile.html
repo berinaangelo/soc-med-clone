@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Edit profile — mockup</title>
+
+<!-- God moment check (mockup-guardrails.md): god-moments.md #3, "This Is Mine" — profile.html
+     made that space visible; this screen is what makes it actually yours to reshape, not just
+     look at. Scope per profile-editing.md: exactly the three app-owned fields from
+     data-model-schema.md (name, bio, profile_picture) — nothing Devise-owned (email/password are
+     a separate concern, not touched here). Requires login + ownership (profile-editing.md), so
+     no logged-out/guest state to demonstrate on this screen, unlike profile.html/directory.html. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 display, Inter 400 body. No IBM Plex Mono
+     — this screen has no handles/timestamps, same call as directory.html. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — the one hand-authored CSS the guardrails allow:
+     custom properties for tokens, font-family declarations, and the couple of native selectors
+     Tailwind has no utility for. Identical tokens to the rest of the mockup series. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13; /* dark theme's own background, per color-scheme.md's fill-role rule */
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display {
+    font-family: 'Sora', sans-serif;
+  }
+
+  /* Focus rule (tech-stack.md): every interactive element gets a visible 2px accent outline,
+     2px offset. :focus-visible has no Tailwind utility, so it's hand-authored here. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Motion (tech-stack.md): component-only 150ms ease transitions, dropped for reduced motion. */
+  a,
+  button,
+  input,
+  textarea {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button,
+    input,
+    textarea {
+      transition: none;
+    }
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail — same shell as profile.html, always logged-in here (this screen requires
+         login + ownership per profile-editing.md, no guest state to demonstrate). Current-tab
+         ring on the avatar, same treatment as profile.html. -->
+    <aside class="w-20 shrink-0 sticky top-0 h-screen flex flex-col items-center py-6 gap-2" style="border-right: 1px solid var(--border); background: var(--background);">
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <a href="feed.html" title="Feed" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+        <a href="directory.html" title="Directory" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+        <a href="#" title="Notifications" class="relative flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full" style="background: var(--accent); border: 2px solid var(--background);"></span>
+        </a>
+      </nav>
+
+      <a href="profile.html" title="Your profile" aria-current="page" class="mt-auto mb-2 shrink-0 rounded-full p-0.5" style="background: var(--primary);">
+        <span id="rail-avatar-fallback" class="hidden w-8 h-8 rounded-full items-center justify-center font-display text-xs font-semibold" style="background: var(--secondary); color: var(--on-fill);">PN</span>
+        <img id="rail-avatar-img" src="https://i.pravatar.cc/64?img=47" alt="" class="w-8 h-8 rounded-full object-cover" />
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <main class="max-w-lg mx-auto px-6 py-10">
+        <div class="flex items-center justify-between gap-4 mb-6">
+          <h1 class="font-display text-2xl font-semibold">Edit profile</h1>
+          <a href="profile.html" class="text-sm font-medium" style="color: var(--muted);">Cancel</a>
+        </div>
+
+        <form class="rounded-2xl p-6" style="background: var(--surface); border: 1px solid var(--border);" novalidate>
+          <div class="flex flex-col gap-5">
+
+            <!-- Profile picture — plain pasted URL per data-model-schema.md, not a file upload.
+                 Live preview updates as you type; falls back to the initials circle
+                 (iconography.md's avatar-fallback rule) the instant the field is empty or the
+                 image fails to load — same fallback the rest of the mockup series already uses,
+                 just demonstrated live here since this is the one screen that edits the source
+                 field for it. -->
+            <div class="flex items-center gap-4">
+              <span id="preview-fallback" class="hidden w-16 h-16 rounded-full items-center justify-center font-display text-base font-semibold shrink-0" style="background: var(--secondary); color: var(--on-fill);">PN</span>
+              <img id="preview-img" src="https://i.pravatar.cc/128?img=47" alt="" class="w-16 h-16 rounded-full object-cover shrink-0" />
+              <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+                <label for="profile_picture" class="text-sm font-medium">Profile picture URL</label>
+                <input
+                  id="profile_picture"
+                  name="profile_picture"
+                  type="url"
+                  value="https://i.pravatar.cc/128?img=47"
+                  oninput="updateAvatarPreview()"
+                  placeholder="https://…"
+                  class="rounded-lg px-3 py-2 text-base bg-transparent w-full"
+                  style="border: 1px solid var(--border); color: var(--text);"
+                />
+                <!-- Neutral hint per iconography.md's form-hint rule: plain text below the field,
+                     --muted, no icon/border-color change/toast. -->
+                <span class="text-xs" style="color: var(--muted);">Paste a link to an image. Leave blank to use your initials instead.</span>
+              </div>
+            </div>
+
+            <!-- Name — required -->
+            <div class="flex flex-col gap-1.5">
+              <label for="name" class="text-sm font-medium">Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autocomplete="name"
+                required
+                value="Priya Nair"
+                class="rounded-lg px-3 py-2 text-base bg-transparent"
+                style="border: 1px solid var(--border); color: var(--text);"
+              />
+              <!-- Error state example (danger text, same plain-text pattern as the hints on this
+                   form) — shown here for reference, same as signup.html's precedent; a real
+                   screen only renders this after a failed submit. -->
+              <span class="text-xs hidden" style="color: var(--danger);">Name can't be blank.</span>
+            </div>
+
+            <!-- Bio — optional, no length cap decided in data-model-schema.md (unlike Posts'
+                 500-char cap), so none is invented here. -->
+            <div class="flex flex-col gap-1.5">
+              <label for="bio" class="text-sm font-medium">Bio</label>
+              <textarea
+                id="bio"
+                name="bio"
+                rows="3"
+                class="rounded-lg px-3 py-2 text-base bg-transparent resize-none"
+                style="border: 1px solid var(--border); color: var(--text);"
+              >Photographer, always chasing golden hour. Currently on a slow trip through the Western Ghats.</textarea>
+              <span class="text-xs" style="color: var(--muted);">Optional.</span>
+            </div>
+
+            <div class="flex items-center gap-3 mt-2">
+              <button
+                type="submit"
+                class="font-display text-sm font-semibold rounded-lg px-4 py-2"
+                style="background: var(--primary); color: var(--on-fill);"
+              >
+                Save changes
+              </button>
+              <a href="profile.html" class="text-sm font-medium rounded-lg px-4 py-2" style="border: 1px solid var(--border); color: var(--text);">
+                Cancel
+              </a>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <!-- Mockup-only — not app UI. Keeps the picture-URL field's live preview in sync, and falls
+       back to the initials circle when the field is empty (the same fallback profile.html
+       demonstrates statically; here it's reachable interactively since this is the field that
+       actually sets it). A real build would also fall back on image-load failure, not just an
+       empty field — out of scope for a static mockup to simulate. -->
+  <script>
+    function updateAvatarPreview() {
+      const url = document.getElementById('profile_picture').value.trim();
+      const img = document.getElementById('preview-img');
+      const fallback = document.getElementById('preview-fallback');
+      const railImg = document.getElementById('rail-avatar-img');
+      const railFallback = document.getElementById('rail-avatar-fallback');
+      const hasUrl = url.length > 0;
+
+      img.classList.toggle('hidden', !hasUrl);
+      fallback.classList.toggle('hidden', hasUrl);
+      fallback.classList.toggle('flex', !hasUrl);
+      railImg.classList.toggle('hidden', !hasUrl);
+      railFallback.classList.toggle('hidden', hasUrl);
+      railFallback.classList.toggle('flex', !hasUrl);
+
+      if (hasUrl) {
+        img.src = url;
+        railImg.src = url;
+      }
+    }
+  </script>
+
+</body>
+</html>

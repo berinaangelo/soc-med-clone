@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Post + comments — mockup (Phase 2 preview)</title>
+
+<!-- PHASE 2 PREVIEW — not MVP. Comments is mvp-scope.md cut #1, parked/not-committed per
+     comments-preview.md, which this mockup is the reference layout for. Don't build against this
+     without re-reading that file's "not decided yet" list first (route, Feed/Profile entry point,
+     comment edit/delete) — it isn't just a caveat, several real gaps are still open.
+
+     God moment check (mockup-guardrails.md): god-moments.md #4, "I'm Part of Something" — the one
+     moment flagged as not actually delivered by MVP because there's no reply mechanism at all.
+     This page is that gap closing: a single post gets room to become an actual conversation
+     instead of a one-way broadcast. Job here: the thread has to read as people actually talking
+     to each other, not a database table of comment rows.
+
+     Layout decision (comments-preview.md): a dedicated page, not an inline expand under the post
+     card in Feed/Profile — keeps Feed scannable for god-moments.md #5 and gives the thread real
+     room. Post shown is Priya's golden-hour post, reused byte-for-byte from feed.html's first post
+     so this reads as "the thing you just clicked into," not a different post. Comments band reuses
+     the exact banded-container-with-divided-rows pattern this same session just built for
+     profile.html's Posts section — same reasoning applies here (a header label + divided rows
+     reads as one connected thread, not a stack of separate cards).
+
+     Comment icon is new — iconography.md explicitly excluded comment/like icons from MVP scope,
+     but didn't forbid one being added when Comments actually gets picked up. Lucide's
+     message-circle, same 1.75px stroke as every other icon in the set, so it doesn't look
+     bolted-on. The thumbs-up icon below is new for the same reason, added per likes-preview.md. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — identical tokens to every other mockup. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13;
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display { font-family: 'Sora', sans-serif; }
+  .font-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+  a:focus-visible,
+  button:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  a,
+  button {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  /* Like-button pop (likes-preview.md) — see feed.html for the full reasoning; same rule reused
+     verbatim so the click feels identical wherever the like affordance appears. */
+  @keyframes like-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+  .like-pop {
+    /* SVG elements default transform-origin to their own viewBox, not their rendered box (a
+       cross-browser inconsistency for scale() specifically) — pin both explicitly so the pop
+       always scales from the icon's visual center. */
+    transform-box: border-box;
+    transform-origin: center;
+    animation: like-pop 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a, button { transition: none; }
+    .like-pop { animation: none; }
+  }
+
+  .composer-input::placeholder {
+    color: var(--muted);
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail (logged-in state only) — same shared markup as every other page. No tab is
+         "current" here, same as profile.html (a post detail page has no nav icon of its own). -->
+    <aside
+      id="rail-logged-in"
+      class="hidden w-20 shrink-0 sticky top-0 h-screen flex-col items-center py-6 gap-2"
+      style="border-right: 1px solid var(--border); background: var(--background);"
+    >
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <a href="feed.html" title="Feed" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+
+        <a href="directory.html" title="Directory" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+
+        <a href="notifications.html" title="Notifications" class="relative flex items-center justify-center p-1.5 rounded-full" style="background: var(--primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color: var(--on-fill);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full" style="background: var(--accent); border: 2px solid var(--background);"></span>
+        </a>
+
+        <!-- Friend requests — new (friend-requests-preview.md), back-ported across every page
+             mockup carrying this rail, same convention Messages used. Person + checkmark, not
+             Directory's two-person glyph, to stay unambiguous one slot away from it. No unread
+             badge, same no-badge precedent Messages already set. -->
+        <a href="friend-requests.html" title="Friend requests" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M15 11.5l2 2 4-4.5" />
+          </svg>
+        </a>
+
+        <!-- Messages — new (direct-messages-preview.md), back-ported across every page mockup
+             carrying this rail. Last in the rail, above the avatar: the one nav item with no
+             god-moment tie, kept after the three that do have one. Lucide "mail," not
+             message-circle (already spoken for by Comments). -->
+        <a
+          href="messages.html"
+          title="Messages"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+          </svg>
+        </a>
+      </nav>
+
+      <a href="profile.html" title="Your profile" class="mt-auto mb-2 shrink-0 rounded-full">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-semibold" style="background: var(--secondary); color: var(--on-fill);">
+          YK
+        </span>
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <!-- Top bar (logged-out state, default) — same two entry points as profile.html/directory.html,
+           since a post is reached the same way a profile is: public, no login required to read. -->
+      <header id="header-logged-out" class="flex items-center justify-end gap-4 px-6 py-4" style="border-bottom: 1px solid var(--border);">
+        <a href="login.html" class="text-sm font-medium" style="color: var(--primary);">Log in</a>
+        <a href="signup.html" class="font-display text-sm font-semibold rounded-lg px-4 py-2" style="background: var(--primary); color: var(--on-fill);">
+          Sign up
+        </a>
+      </header>
+
+      <main class="max-w-3xl mx-auto px-6 py-10">
+
+        <!-- Mockup-only state toggles — not app UI, same pattern as every other page mockup. -->
+        <div class="flex items-center justify-end gap-2 flex-wrap mb-6">
+          <button
+            type="button"
+            id="toggle-login-btn"
+            onclick="toggleLoggedIn()"
+            class="text-xs font-medium rounded-lg px-3 py-1.5"
+            style="border: 1px solid var(--border); color: var(--muted);"
+          >
+            Preview logged-in view
+          </button>
+          <button
+            type="button"
+            id="toggle-empty-btn"
+            onclick="toggleEmpty()"
+            class="text-xs font-medium rounded-lg px-3 py-1.5"
+            style="border: 1px solid var(--border); color: var(--muted);"
+          >
+            Preview empty state
+          </button>
+        </div>
+
+        <a href="feed.html" class="inline-flex items-center gap-1.5 text-sm font-medium mb-4" style="color: var(--muted);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Back to Feed
+        </a>
+
+        <!-- The post — reused byte-for-byte from feed.html's first post (Priya, golden hour),
+             same card shape as every other post card in the mockup set. -->
+        <article class="rounded-2xl p-5 mb-6 flex gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+          <img src="https://i.pravatar.cc/96?img=47" alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
+          <div class="flex flex-col gap-1.5 min-w-0">
+            <div class="flex items-baseline gap-2 flex-wrap">
+              <span class="font-display text-base font-semibold">Priya Nair</span>
+              <span class="font-mono text-xs" style="color: var(--muted);">@priya_n · 2h</span>
+            </div>
+            <p class="text-base" style="color: var(--text);">
+              Golden hour in the Western Ghats tonight. Forgot how quiet it gets up here — no
+              signal, no notifications, just the light doing its thing.
+            </p>
+            <!-- PHASE 2 PREVIEW addition (likes-preview.md): like affordance. No comment-count
+                 row here — this is comments-preview.md's own post-detail page, the thread is
+                 already shown in full below, a count would be redundant — so the like button
+                 stands alone as the card's last element. Same post as feed.html's Post 1
+                 (byte-for-byte reuse), so same liked/count state: pre-liked, 12. -->
+            <button type="button" id="like-btn" onclick="toggleLike()" class="inline-flex items-center gap-1.5 text-sm mt-1 w-fit" style="color: var(--secondary);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+                <path d="M7 10v12" />
+              </svg>
+              <span id="like-count">12</span> likes
+            </button>
+          </div>
+        </article>
+
+        <!-- Comment composer — reuses Feed's composer shape exactly (avatar + textarea + counter +
+             button), same 500-char cap as Post rather than inventing a new number
+             (comments-preview.md). Logged-in only; a guest sees a plain prompt into login.html
+             instead, same spirit as Follow being hidden for guests on profile.html. -->
+        <div id="composer-logged-in" class="hidden rounded-2xl p-5 mb-6 gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+          <span class="w-10 h-10 rounded-full flex items-center justify-center font-display text-sm font-semibold shrink-0" style="background: var(--secondary); color: var(--on-fill);">
+            YK
+          </span>
+          <div class="flex-1 flex flex-col gap-3">
+            <textarea
+              id="comment-textarea"
+              rows="2"
+              maxlength="500"
+              oninput="updateCommentCounter()"
+              placeholder="Write a comment…"
+              class="composer-input w-full resize-none bg-transparent text-base focus-visible:outline-none"
+              style="color: var(--text);"
+            ></textarea>
+            <div class="flex items-center justify-between">
+              <span id="comment-counter" class="text-xs" style="color: var(--muted);">0/500</span>
+              <button type="button" class="font-display text-sm font-semibold rounded-lg px-4 py-2" style="background: var(--primary); color: var(--on-fill);">
+                Reply
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="composer-guest" class="rounded-2xl p-5 mb-6 text-center" style="background: var(--surface); border: 1px solid var(--border);">
+          <p class="text-sm" style="color: var(--muted);">
+            <a href="login.html" class="font-medium" style="color: var(--primary);">Log in</a>
+            to join the conversation.
+          </p>
+        </div>
+
+        <!-- Comments band — same banded-container-with-divided-rows pattern as profile.html's
+             Posts section: one bordered surface, a label bar, divide-y rows instead of separate
+             floating cards, so the thread reads as one connected conversation. -->
+        <div class="rounded-2xl overflow-hidden" style="border: 1px solid var(--border); background: var(--surface);">
+          <div class="px-5 py-3" style="border-bottom: 1px solid var(--border);">
+            <h2 class="font-display text-sm font-semibold uppercase tracking-wide" style="color: var(--muted);">Comments</h2>
+          </div>
+
+          <div id="comments-list" class="flex flex-col divide-y divide-[var(--border)]">
+            <article class="p-5 flex items-start gap-3">
+              <span class="w-9 h-9 rounded-full flex items-center justify-center font-display text-xs font-semibold shrink-0" style="background: var(--secondary); color: var(--on-fill);">
+                MO
+              </span>
+              <div class="flex flex-col gap-1 min-w-0">
+                <div class="flex items-baseline gap-2 flex-wrap">
+                  <span class="font-display text-sm font-semibold">Marcus Ostrander</span>
+                  <span class="font-mono text-xs" style="color: var(--muted);">@marcus_o · 1h</span>
+                </div>
+                <p class="text-sm" style="color: var(--text);">This is incredible light. Which lens?</p>
+              </div>
+            </article>
+
+            <article class="p-5 flex items-start gap-3">
+              <img src="https://i.pravatar.cc/96?img=32" alt="" class="w-9 h-9 rounded-full object-cover shrink-0" />
+              <div class="flex flex-col gap-1 min-w-0">
+                <div class="flex items-baseline gap-2 flex-wrap">
+                  <span class="font-display text-sm font-semibold">Grace Odhiambo</span>
+                  <span class="font-mono text-xs" style="color: var(--muted);">@grace_o · 45m</span>
+                </div>
+                <p class="text-sm" style="color: var(--text);">The Ghats hit different in monsoon season, don't they.</p>
+              </div>
+            </article>
+
+            <article class="p-5 flex items-start gap-3">
+              <span class="w-9 h-9 rounded-full flex items-center justify-center font-display text-xs font-semibold shrink-0" style="background: var(--secondary); color: var(--on-fill);">
+                AR
+              </span>
+              <div class="flex flex-col gap-1 min-w-0">
+                <div class="flex items-baseline gap-2 flex-wrap">
+                  <span class="font-display text-sm font-semibold">Ana Rodrigues</span>
+                  <span class="font-mono text-xs" style="color: var(--muted);">@ana_r · 20m</span>
+                </div>
+                <p class="text-sm" style="color: var(--text);">okay but the quiet part is the real flex here</p>
+              </div>
+            </article>
+          </div>
+
+          <!-- Empty state — same icon-top/text-below structure as empty-states.md, extended here
+               for a state that table doesn't cover (Comments is Phase 2). No CTA: the composer
+               above is already the door to this god moment, so repeating it here would be
+               redundant, per empty-states.md's own "skip the CTA if there's no real next action"
+               rule applied to a slightly different reason (the action already exists on-screen). -->
+          <div id="comments-empty" class="hidden flex-col items-center text-center gap-2 py-16">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10" style="color: var(--muted);">
+              <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+            </svg>
+            <p class="font-display text-lg font-semibold">No comments yet</p>
+            <p class="text-sm" style="color: var(--muted);">Be the first to say something.</p>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Mockup-only state logic — not app UI, same spirit as every other page mockup. -->
+  <script>
+    let emptyMode = false;
+
+    function isGuest() {
+      return !document.getElementById('header-logged-out').classList.contains('hidden');
+    }
+
+    function toggleLoggedIn() {
+      document.getElementById('header-logged-out').classList.toggle('hidden');
+      document.getElementById('rail-logged-in').classList.toggle('hidden');
+      document.getElementById('rail-logged-in').classList.toggle('flex');
+      const btn = document.getElementById('toggle-login-btn');
+      btn.textContent = btn.textContent.startsWith('Preview') ? 'Back to logged-out view' : 'Preview logged-in view';
+      render();
+    }
+
+    function toggleEmpty() {
+      emptyMode = !emptyMode;
+      const btn = document.getElementById('toggle-empty-btn');
+      btn.textContent = emptyMode ? 'Back to comments' : 'Preview empty state';
+      render();
+    }
+
+    function render() {
+      const guest = isGuest();
+      document.getElementById('composer-logged-in').classList.toggle('hidden', guest);
+      document.getElementById('composer-logged-in').classList.toggle('flex', !guest);
+      document.getElementById('composer-guest').classList.toggle('hidden', !guest);
+
+      document.getElementById('comments-list').classList.toggle('hidden', emptyMode);
+      document.getElementById('comments-empty').classList.toggle('hidden', !emptyMode);
+      document.getElementById('comments-empty').classList.toggle('flex', emptyMode);
+    }
+
+    function updateCommentCounter() {
+      const len = document.getElementById('comment-textarea').value.length;
+      document.getElementById('comment-counter').textContent = `${len}/500`;
+    }
+
+    // PHASE 2 PREVIEW addition (likes-preview.md): mockup-only like toggle, same pattern as
+    // feed.html's, pre-liked to match feed.html's Post 1 (same post, reused byte-for-byte).
+    let liked = true;
+    let likeCount = 12;
+
+    function renderLike() {
+      const btn = document.getElementById('like-btn');
+      const icon = btn.querySelector('svg');
+      document.getElementById('like-count').textContent = likeCount;
+      btn.style.color = liked ? 'var(--secondary)' : 'var(--muted)';
+      icon.setAttribute('fill', liked ? 'currentColor' : 'none');
+    }
+
+    function toggleLike() {
+      liked = !liked;
+      likeCount += liked ? 1 : -1;
+      renderLike();
+      const icon = document.getElementById('like-btn').querySelector('svg');
+      icon.classList.remove('like-pop');
+      void icon.offsetWidth; // restart the animation if clicked again quickly
+      icon.classList.add('like-pop');
+    }
+
+    renderLike();
+
+    render();
+  </script>
+
+</body>
+</html>

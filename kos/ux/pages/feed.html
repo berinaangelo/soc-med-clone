@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Feed — mockup</title>
+
+<!-- God moment check (mockup-guardrails.md): this is god-moments.md #5, "I Can't Stop
+     Checking" — the logged-in root path (public-vs-authenticated-pages.md), so it's the very
+     first thing a returning user sees. Job here: read as alive (varied, real-feeling posts),
+     not a placeholder grid, with exactly one obvious primary action (post something). The empty
+     state doors into god-moments.md #2, "I Found My People," per empty-states.md's stated
+     intent for this exact state.
+
+     Redraw v2: swapped the top nav bar for a left icon-rail, and added a literal connecting
+     line down the avatar column — a nod to color-scheme.md's palette name, "Single Thread."
+     Both moves exist to make the page read as its own layout, not a generic centered-column
+     feed clone; see feed-pagination.md, whose "Loading more…" affordance the thread line now
+     runs into, reinforcing that the stream keeps going. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 display, Inter 400 body, and — unlike
+     directory.html — IBM Plex Mono 400 too, since this screen has handles/timestamps
+     (identity-only, never prose, per typography.md). -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — the one hand-authored CSS the guardrails allow:
+     custom properties for tokens, font-family declarations, and the couple of native selectors
+     Tailwind has no utility for. Identical tokens to directory.html. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13; /* dark theme's own background, per color-scheme.md's fill-role rule */
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display {
+    font-family: 'Sora', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  /* Focus rule (tech-stack.md): every interactive element gets a visible 2px accent outline,
+     2px offset. :focus-visible has no Tailwind utility, so it's hand-authored here. */
+  a:focus-visible,
+  button:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Motion (tech-stack.md): component-only 150ms ease transitions, dropped for reduced motion. */
+  a,
+  button {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  /* Like-button pop (likes-preview.md): a one-off click animation on the thumbs-up icon, layered
+     on top of the color transition above rather than replacing it — plays on every click
+     (toggleLike in the script below), like and unlike alike, but never on initial render. Same
+     150ms duration as the rest of this file's motion so it doesn't read as a different kind of
+     animation. */
+  @keyframes like-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+  .like-pop {
+    /* SVG elements default transform-origin to their own viewBox, not their rendered box (a
+       cross-browser inconsistency for scale() specifically) — pin both explicitly so the pop
+       always scales from the icon's visual center. */
+    transform-box: border-box;
+    transform-origin: center;
+    animation: like-pop 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button {
+      transition: none;
+    }
+    .like-pop {
+      animation: none;
+    }
+  }
+
+  .composer-input::placeholder {
+    color: var(--muted);
+  }
+
+  /* Thread connector — the one hand-authored layout rule Tailwind can't express as a plain
+     utility (a fixed-width line centered under a fixed-width avatar slot). w-10 matches every
+     avatar's w-10 box exactly, so the line always lands under the avatar center above/below it. */
+  .thread-connector {
+    padding-left: 1.25rem; /* matches each card's p-5 */
+  }
+  .thread-connector .line {
+    width: 2px;
+    height: 1rem;
+    background: var(--border);
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail: first logged-in nav in the mockup series (nav placement/layout was
+         explicitly left open in notifications-ui.md) — simplest reasonable call, not a
+         re-decision. Icons per iconography.md's Signal Weight rule: outline at rest, solid
+         primary chip only for the current tab. No wordmark, matching directory.html's
+         precedent (nothing decided for one). Sticky so it stays reachable through an
+         infinite-scrolling feed (feed-pagination.md). -->
+    <aside
+      class="w-20 shrink-0 sticky top-0 h-screen flex flex-col items-center py-6 gap-2"
+      style="border-right: 1px solid var(--border); background: var(--background);"
+    >
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <!-- Feed — current tab: solid primary chip, w-4 h-4 icon per iconography.md's nav-item spec -->
+        <a
+          href="feed.html"
+          aria-current="page"
+          title="Feed"
+          class="flex items-center justify-center p-1.5 rounded-full"
+          style="background: var(--primary);"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color: var(--on-fill);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+
+        <!-- Directory — outline at rest, same two-person glyph as directory.html -->
+        <a
+          href="directory.html"
+          title="Directory"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+
+        <!-- Notifications — unread: solid primary chip (iconography.md names "unread bell" as
+             one of Signal Weight's chip states, same weight as a current-tab icon) plus the
+             accent corner dot on top of it, per notifications-ui.md ("the dot is the corner
+             marker on top of that [chip], not a replacement for it") — shown here to demonstrate
+             the unread state. Full read/unread toggle lives in components/nav.html. -->
+        <a
+          href="notifications.html"
+          title="Notifications"
+          class="relative flex items-center justify-center p-1.5 rounded-full"
+          style="background: var(--primary);"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color: var(--on-fill);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full" style="background: var(--accent); border: 2px solid var(--background);"></span>
+        </a>
+
+        <!-- Friend requests — new (friend-requests-preview.md), back-ported across every page
+             mockup carrying this rail, same convention Messages used. Person + checkmark, not
+             Directory's two-person glyph, to stay unambiguous one slot away from it. No unread
+             badge, same no-badge precedent Messages already set. -->
+        <a href="friend-requests.html" title="Friend requests" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M15 11.5l2 2 4-4.5" />
+          </svg>
+        </a>
+
+        <!-- Messages — new (direct-messages-preview.md), back-ported across every page mockup
+             carrying this rail. Last in the rail, above the avatar: the one nav item with no
+             god-moment tie, kept after the three that do have one. Lucide "mail," not
+             message-circle (already spoken for by Comments). -->
+        <a
+          href="messages.html"
+          title="Messages"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+          </svg>
+        </a>
+      </nav>
+
+      <!-- Profile — the viewer's own avatar (not a generic icon), per iconography.md's avatar
+           rule. Pinned to the bottom of the rail so it stays clear of the nav cluster above. -->
+      <a href="#" title="Your profile" class="mt-auto mb-2 shrink-0 rounded-full">
+        <span
+          class="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-semibold"
+          style="background: var(--secondary); color: var(--on-fill);"
+        >
+          YK
+        </span>
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <main class="max-w-3xl mx-auto px-6 py-10">
+        <div class="flex items-start justify-between gap-4 mb-6">
+          <h1 class="font-display text-2xl font-semibold">Feed</h1>
+          <!-- Mockup-only state toggle — not app UI, same pattern as directory.html: lets this
+               file show both the populated feed and the empty state without two separate HTML
+               files. The composer stays visible in both states — posting doesn't depend on
+               having followers. -->
+          <button
+            type="button"
+            onclick="document.getElementById('feed-list').classList.toggle('hidden');
+                      document.getElementById('feed-loading-more').classList.toggle('hidden');
+                      document.getElementById('feed-empty').classList.toggle('hidden');
+                      document.getElementById('feed-empty').classList.toggle('flex');
+                      this.textContent = this.textContent.startsWith('Preview') ? 'Back to feed' : 'Preview empty state';"
+            class="text-xs font-medium rounded-lg px-3 py-1.5 shrink-0"
+            style="border: 1px solid var(--border); color: var(--muted);"
+          >
+            Preview empty state
+          </button>
+        </div>
+
+        <!-- Composer — the one obvious primary action on this screen (PLAN.md step 2: "user
+             writes a text post"). Inline at the top of Feed rather than a separate compose
+             page/route, which the KOS never names — consistent with ruthless-simplicity.md.
+             Padding matches the post cards below (p-5) so its avatar lines up with the thread
+             connector that starts right underneath it. -->
+        <div class="rounded-2xl p-5 mb-4 flex gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+          <span
+            class="w-10 h-10 rounded-full flex items-center justify-center font-display text-sm font-semibold shrink-0"
+            style="background: var(--secondary); color: var(--on-fill);"
+          >
+            YK
+          </span>
+          <div class="flex-1 flex flex-col gap-3">
+            <textarea
+              rows="2"
+              maxlength="500"
+              placeholder="What's on your mind?"
+              class="composer-input w-full resize-none bg-transparent text-base focus-visible:outline-none"
+              style="color: var(--text);"
+            ></textarea>
+            <div class="flex items-center justify-between">
+              <span class="text-xs" style="color: var(--muted);">0/500</span>
+              <button
+                type="button"
+                class="font-display text-sm font-semibold rounded-lg px-4 py-2"
+                style="background: var(--primary); color: var(--on-fill);"
+              >
+                Post
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post list — reverse-chronological, from followed users only. No edit/delete (that's
+             owner-only, on the viewer's own profile, not shown here). Handle+timestamp format
+             ("@name · 2m") matches the precedent already drawn in typography.html's specimen.
+
+             Thread connector: a plain 2px line (.thread-connector) sits between every avatar —
+             composer→post1, post→post, and post5→"Loading more" — literalizing the palette's
+             own name (color-scheme.md: "Single Thread") instead of a generic gap. Each one
+             replaces what was a plain gap-4 in the previous draft, same 1rem of vertical space.
+
+             PHASE 2 PREVIEW addition: each post now has a comment-count affordance (icon + "N
+             comments") per comments-preview.md, linking into post.html. Only Priya's golden-hour
+             post (Post 1) actually matches a built post-detail page, so only that one links there
+             for real — the other four use "#" placeholders rather than pointing at content that
+             doesn't match, same convention notifications.html already used for its avatar links.
+             Each post also now has a like affordance (thumbs-up + "N likes") in the same row per
+             likes-preview.md — outline/muted at rest, solid/--secondary when liked, click-
+             toggleable; see that file for the icon-fill/state-color decision. -->
+        <div id="feed-list" class="flex flex-col">
+
+          <div class="thread-connector flex">
+            <div class="w-10 flex justify-center"><div class="line"></div></div>
+          </div>
+
+          <!-- Post 1 — profile_picture set, recent -->
+          <article class="rounded-2xl p-5 flex gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <img src="https://i.pravatar.cc/96?img=47" alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
+            <div class="flex flex-col gap-1.5 min-w-0">
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <span class="font-display text-base font-semibold">Priya Nair</span>
+                <span class="font-mono text-xs" style="color: var(--muted);">@priya_n · 12m</span>
+              </div>
+              <p class="text-base" style="color: var(--text);">
+                Golden hour in the Western Ghats tonight. Forgot how quiet it gets up here — no
+                signal, no notifications, just the light doing its thing.
+              </p>
+              <div class="flex items-center gap-4 mt-1">
+                <button type="button" id="like-btn-1" onclick="toggleLike(1)" class="inline-flex items-center gap-1.5 text-sm" style="color: var(--secondary);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+                    <path d="M7 10v12" />
+                  </svg>
+                  <span id="like-count-1">12</span> likes
+                </button>
+                <a href="post.html" class="inline-flex items-center gap-1.5 text-sm hover:text-[var(--text)]" style="color: var(--muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                  </svg>
+                  3 comments
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <div class="thread-connector flex">
+            <div class="w-10 flex justify-center"><div class="line"></div></div>
+          </div>
+
+          <!-- Post 2 — initials avatar fallback -->
+          <article class="rounded-2xl p-5 flex gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <span
+              class="w-10 h-10 rounded-full flex items-center justify-center font-display text-sm font-semibold shrink-0"
+              style="background: var(--secondary); color: var(--on-fill);"
+            >
+              MO
+            </span>
+            <div class="flex flex-col gap-1.5 min-w-0">
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <span class="font-display text-base font-semibold">Marcus Ostrander</span>
+                <span class="font-mono text-xs" style="color: var(--muted);">@marcus_o · 1h</span>
+              </div>
+              <p class="text-base" style="color: var(--text);">
+                Finally got the old workbench flat. Took longer to true up than it took my
+                grandfather to build the thing in the first place.
+              </p>
+              <div class="flex items-center gap-4 mt-1">
+                <button type="button" id="like-btn-2" onclick="toggleLike(2)" class="inline-flex items-center gap-1.5 text-sm" style="color: var(--muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+                    <path d="M7 10v12" />
+                  </svg>
+                  <span id="like-count-2">4</span> likes
+                </button>
+                <a href="#" class="inline-flex items-center gap-1.5 text-sm hover:text-[var(--text)]" style="color: var(--muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                  </svg>
+                  1 comment
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <div class="thread-connector flex">
+            <div class="w-10 flex justify-center"><div class="line"></div></div>
+          </div>
+
+          <!-- Post 3 — short post, long gap since posting -->
+          <article class="rounded-2xl p-5 flex gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <img src="https://i.pravatar.cc/96?img=32" alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
+            <div class="flex flex-col gap-1.5 min-w-0">
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <span class="font-display text-base font-semibold">Grace Odhiambo</span>
+                <span class="font-mono text-xs" style="color: var(--muted);">@grace_o · 4h</span>
+              </div>
+              <p class="text-base" style="color: var(--text);">
+                Started a new book. Already telling everyone about it. No regrets.
+              </p>
+              <div class="flex items-center gap-4 mt-1">
+                <button type="button" id="like-btn-3" onclick="toggleLike(3)" class="inline-flex items-center gap-1.5 text-sm" style="color: var(--muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+                    <path d="M7 10v12" />
+                  </svg>
+                  <span id="like-count-3">0</span> likes
+                </button>
+                <a href="#" class="inline-flex items-center gap-1.5 text-sm hover:text-[var(--text)]" style="color: var(--muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                  </svg>
+                  0 comments
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <div class="thread-connector flex">
+            <div class="w-10 flex justify-center"><div class="line"></div></div>
+          </div>
+
+          <!-- Post 4 — initials avatar, longer post -->
+          <article class="rounded-2xl p-5 flex gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <span
+              class="w-10 h-10 rounded-full flex items-center justify-center font-display text-sm font-semibold shrink-0"
+              style="background: var(--secondary); color: var(--on-fill);"
+            >
+              AR
+            </span>
+            <div class="flex flex-col gap-1.5 min-w-0">
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <span class="font-display text-base font-semibold">Ana Rodrigues</span>
+                <span class="font-mono text-xs" style="color: var(--muted);">@ana_r · 9h</span>
+              </div>
+              <p class="text-base" style="color: var(--text);">
+                Sourdough finally proofed right on the first try in a month — turns out the
+                problem the whole time was my kitchen, not the starter. The cats remain
+                unimpressed either way.
+              </p>
+              <div class="flex items-center gap-4 mt-1">
+                <button type="button" id="like-btn-4" onclick="toggleLike(4)" class="inline-flex items-center gap-1.5 text-sm" style="color: var(--secondary);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+                    <path d="M7 10v12" />
+                  </svg>
+                  <span id="like-count-4">8</span> likes
+                </button>
+                <a href="#" class="inline-flex items-center gap-1.5 text-sm hover:text-[var(--text)]" style="color: var(--muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                  </svg>
+                  5 comments
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <div class="thread-connector flex">
+            <div class="w-10 flex justify-center"><div class="line"></div></div>
+          </div>
+
+          <!-- Post 5 — yesterday -->
+          <article class="rounded-2xl p-5 flex gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <img src="https://i.pravatar.cc/96?img=15" alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
+            <div class="flex flex-col gap-1.5 min-w-0">
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <span class="font-display text-base font-semibold">Leo Fischer</span>
+                <span class="font-mono text-xs" style="color: var(--muted);">@leo_f · 1d</span>
+              </div>
+              <p class="text-base" style="color: var(--text);">
+                22km today, badly. The century ride is going to humble me and I've made my peace
+                with it.
+              </p>
+              <div class="flex items-center gap-4 mt-1">
+                <button type="button" id="like-btn-5" onclick="toggleLike(5)" class="inline-flex items-center gap-1.5 text-sm" style="color: var(--muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+                    <path d="M7 10v12" />
+                  </svg>
+                  <span id="like-count-5">1</span> likes
+                </button>
+                <a href="#" class="inline-flex items-center gap-1.5 text-sm hover:text-[var(--text)]" style="color: var(--muted);">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                  </svg>
+                  2 comments
+                </a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Trailing connector into the loading indicator — the thread keeps running past the
+               last loaded post, echoing feed-pagination.md's infinite-scroll decision. -->
+          <div class="thread-connector flex">
+            <div class="w-10 flex justify-center"><div class="line"></div></div>
+          </div>
+        </div>
+
+        <!-- Infinite scroll affordance — per feed-pagination.md's decision (Feed loads older
+             posts via infinite scroll, not numbered pagination; unlike the Directory's
+             deliberate no-pager cap). Static marker only — this mockup has a fixed post list,
+             no real scroll-triggered loading; build-time mechanics (Turbo Frames/Stream append
+             vs. a Stimulus scroll-observer) aren't decided yet. -->
+        <div id="feed-loading-more" class="flex items-center justify-center gap-2 py-6">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" class="w-4 h-4 animate-spin" style="color: var(--muted);">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </svg>
+          <span class="text-sm" style="color: var(--muted);">Loading more…</span>
+        </div>
+
+        <!-- Empty state — exact copy from empty-states.md's Feed row: icon i-directory (same
+             two-person glyph as the rail's Directory icon, drawn bigger/muted per that
+             decision's icon rule), heading, subtext, CTA into directory.html. Doors into
+             god-moments.md #2. No thread connector here — nothing to connect yet. -->
+        <div id="feed-empty" class="hidden flex-col items-center text-center gap-2 py-20">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10" style="color: var(--muted);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <p class="font-display text-lg font-semibold">Your feed is quiet</p>
+          <p class="text-sm" style="color: var(--muted);">Follow a few people and their posts will show up here.</p>
+          <a
+            href="directory.html"
+            class="font-display text-sm font-semibold rounded-lg px-4 py-2 mt-2"
+            style="background: var(--primary); color: var(--on-fill);"
+          >
+            Browse the directory
+          </a>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- PHASE 2 PREVIEW addition (likes-preview.md): mockup-only like toggle, this file's first
+       script — a like is a toggle, not a display value, so it should behave like one even in
+       a static mockup (same "instant validation" reasoning as profile.html's Follow toggle). -->
+  <script>
+    const likeState = {
+      1: { liked: true,  count: 12 },
+      2: { liked: false, count: 4 },
+      3: { liked: false, count: 0 },
+      4: { liked: true,  count: 8 },
+      5: { liked: false, count: 1 }
+    };
+
+    function renderLike(id) {
+      const state = likeState[id];
+      const btn = document.getElementById(`like-btn-${id}`);
+      const icon = btn.querySelector('svg');
+      document.getElementById(`like-count-${id}`).textContent = state.count;
+      btn.style.color = state.liked ? 'var(--secondary)' : 'var(--muted)';
+      icon.setAttribute('fill', state.liked ? 'currentColor' : 'none');
+    }
+
+    function toggleLike(id) {
+      const state = likeState[id];
+      state.liked = !state.liked;
+      state.count += state.liked ? 1 : -1;
+      renderLike(id);
+      const icon = document.getElementById(`like-btn-${id}`).querySelector('svg');
+      icon.classList.remove('like-pop');
+      void icon.offsetWidth; // restart the animation if clicked again quickly
+      icon.classList.add('like-pop');
+    }
+
+    Object.keys(likeState).forEach((id) => renderLike(Number(id)));
+  </script>
+
+</body>
+</html>

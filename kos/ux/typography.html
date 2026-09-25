@@ -1,0 +1,369 @@
+<title>Type Specimen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg: #FAF9FA;
+    --surface: #F9F6F8;
+    --border: #E4DAE1;
+    --text: #2B2229;
+    --muted: #74636F;
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --on-fill: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #140F13;
+      --surface: #21181E;
+      --border: #574252;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --on-fill: #140F13;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #140F13;
+    --surface: #21181E;
+    --border: #574252;
+    --text: #EDE9EC;
+    --muted: #A696A2;
+    --primary: #D369B9;
+    --secondary: #CA91BC;
+    --accent: #E444BC;
+    --on-fill: #140F13;
+  }
+
+  *{ box-sizing: border-box; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .doc{ max-width: 800px; margin: 0 auto; padding: 4.5rem 1.5rem 6rem; }
+  ::selection{ background: var(--accent); color: var(--on-fill); }
+  a{ color: var(--primary); }
+  :focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .eyebrow{
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---- Masthead ---- */
+  .masthead{ padding-bottom: 2.5rem; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
+  .masthead h1{
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(2rem, 5.2vw, 2.9rem);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0.6rem 0 1.1rem;
+    color: var(--text);
+  }
+  .masthead p{ max-width: 62ch; color: var(--muted); font-size: 1.05rem; }
+  .masthead .brief{
+    margin-top: 1.75rem;
+    padding: 1.1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    font-size: 0.92rem;
+    color: var(--text);
+    max-width: 62ch;
+  }
+  .masthead .brief b{ color: var(--primary); }
+
+  /* ---- Recommendation block ---- */
+  .rec{ margin-bottom: 4.5rem; }
+  .rec-head{ margin-bottom: 1.5rem; }
+  .rec-code{ color: var(--secondary); }
+  .rec-head h2{
+    font-size: 1.7rem;
+    margin: 0.35rem 0 0.5rem;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+  .rec-head .twist{ max-width: 66ch; color: var(--muted); font-size: 0.98rem; }
+  .rec-head .twist strong{ color: var(--text); font-weight: 600; }
+
+  .stack{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2.25rem 2rem;
+  }
+
+  /* live type scale row */
+  .scale{ display: flex; align-items: baseline; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.75rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
+  .scale .Aa{ font-size: 4.2rem; line-height: 1; color: var(--primary); }
+  .scale .role-list{ display: flex; flex-direction: column; gap: 0.35rem; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.75rem; color: var(--muted); }
+  .scale .role-list span b{ color: var(--text); font-weight: 500; }
+
+  /* mock post card, reused verbatim across all three so only type changes */
+  .mock{ display: grid; gap: 0.9rem; }
+  .mock .who{ display: flex; align-items: baseline; gap: 0.55rem; flex-wrap: wrap; }
+  .mock .name{ font-weight: 600; color: var(--text); }
+  .mock .handle{ color: var(--muted); font-size: 0.9rem; }
+  .mock .bio{ color: var(--secondary); font-size: 0.95rem; }
+  .mock .post{ color: var(--text); font-size: 1.05rem; max-width: 56ch; }
+  .mock .notice{
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    width: fit-content;
+    padding: 0.4rem 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: 0.82rem; color: var(--muted);
+  }
+  .mock .notice .dot{ width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
+  .mock .cta{
+    width: fit-content;
+    padding: 0.55rem 1.2rem;
+    background: var(--accent);
+    color: var(--on-fill);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    cursor: default;
+  }
+
+  /* spec table */
+  .spec{ margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .spec table{ width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .spec th{ text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; padding: 0 0.5rem 0.5rem 0; }
+  .spec td{ padding: 0.4rem 0.5rem 0.4rem 0; color: var(--text); border-top: 1px solid var(--border); vertical-align: baseline; }
+  .spec td:first-child{ color: var(--muted); white-space: nowrap; }
+  .spec-wrap{ overflow-x: auto; }
+
+  /* ---- Recommendation-specific type ---- */
+  /* 315.1 — Kept Voice */
+  .r-kv .Aa, .r-kv .mock .name{ font-family: "Fraunces", ui-serif, Georgia, serif; font-optical-sizing: auto; }
+  .r-kv .Aa{ font-weight: 500; }
+  .r-kv .mock .name{ font-weight: 500; font-size: 1.2rem; }
+  .r-kv .mock .handle{ font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .r-kv .mock .bio{ font-family: "Fraunces", ui-serif, Georgia, serif; font-style: italic; font-optical-sizing: auto; font-size: 1.05rem; }
+  .r-kv .mock .post{ font-family: "IBM Plex Sans", ui-sans-serif, sans-serif; }
+  .r-kv .mock .notice{ font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  /* 315.2 — One Family */
+  .r-of .Aa, .r-of .mock .name, .r-of .mock .post, .r-of .mock .bio{ font-family: "Newsreader", ui-serif, Georgia, serif; font-optical-sizing: auto; }
+  .r-of .Aa{ font-weight: 400; font-size: 4.6rem; }
+  .r-of .mock .name{ font-weight: 600; font-size: 1.2rem; }
+  .r-of .mock .bio{ font-style: italic; font-weight: 400; font-size: 1.05rem; }
+  .r-of .mock .post{ font-weight: 400; font-optical-sizing: auto; }
+  .r-of .mock .handle{ font-family: "Newsreader", ui-serif, Georgia, serif; font-variant-numeric: tabular-nums; letter-spacing: 0.01em; }
+  .r-of .mock .notice{ font-family: "Newsreader", ui-serif, Georgia, serif; letter-spacing: 0.03em; text-transform: uppercase; font-size: 0.72rem; }
+  .r-of .mock .cta{ font-family: "Newsreader", ui-serif, Georgia, serif; font-weight: 600; letter-spacing: 0.02em; }
+
+  /* 315.3 — Signed Sans */
+  .r-ss .Aa{ font-family: "Sora", ui-sans-serif, sans-serif; font-weight: 600; }
+  .r-ss .mock .name{ font-family: "Sora", ui-sans-serif, sans-serif; font-weight: 600; font-size: 1.15rem; }
+  .r-ss .mock .bio{ font-family: "Inter", ui-sans-serif, sans-serif; font-size: 0.95rem; }
+  .r-ss .mock .post{ font-family: "Inter", ui-sans-serif, sans-serif; }
+  .r-ss .mock .handle, .r-ss .mock .notice{ font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .r-ss .mock .cta{ font-family: "Sora", ui-sans-serif, sans-serif; }
+
+  /* ---- Verdict ---- */
+  .verdict{ margin-top: 4rem; padding-top: 2.5rem; border-top: 1px solid var(--border); }
+  .verdict h2{ font-family: "Fraunces", ui-serif, Georgia, serif; font-weight: 500; font-size: 1.6rem; margin: 0.5rem 0 1rem; }
+  .verdict p{ max-width: 66ch; color: var(--text); }
+  .verdict p.muted{ color: var(--muted); font-size: 0.95rem; }
+  .verdict .pick{
+    display: inline-block; margin: 0.25rem 0 1.25rem;
+    padding: 0.3rem 0.7rem;
+    background: var(--primary); color: var(--on-fill);
+    font-family: "IBM Plex Mono", monospace; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  footer{ margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-family: "IBM Plex Mono", monospace; font-size: 0.72rem; color: var(--muted); }
+
+  @media (prefers-reduced-motion: no-preference){
+    .rec{ animation: none; }
+  }
+</style>
+
+<div class="doc">
+
+  <div class="masthead">
+    <span class="eyebrow">Type decision — Single Thread</span>
+    <h1>Three ways to set the type</h1>
+    <p>Single Thread's palette made its case with one twist: a single hue, tuned only by
+    lightness and saturation, because a text-first app shouldn't compete with its own words.
+    These three recommendations each carry a typographic twist that plays the same game — not
+    three unrelated font pairings, but three different answers to "what does restraint look like
+    in type." Same brand colors, same mock post, only the type changes.</p>
+    <div class="brief">
+      <b>The fixture:</b> every recommendation below sets the exact same content — a profile
+      name, a bio line, a post, a follow notice, a button — so the type is the only variable.
+      Colors are the live Single Thread tokens (<code>#762D64</code> primary /
+      <code>#CA21A0</code> accent), light or dark depending on how you're reading this.
+    </div>
+  </div>
+
+  <!-- 315.1 -->
+  <section class="rec r-kv">
+    <div class="rec-head">
+      <span class="eyebrow rec-code">315.1 — Kept Voice</span>
+      <h2>Fraunces + IBM Plex Sans + IBM Plex Mono</h2>
+      <p class="twist">The twist: <strong>italic breaks rank for anything in the user's own
+      voice.</strong> Names and posts stay in an upright serif/sans; the moment text is a bio or
+      caption — someone describing themselves, not just posting — it drops into italic Fraunces,
+      like a hand annotating the margin. Mirrors the palette's own exception: Success/Warning/
+      Danger break the single hue on purpose, because some things need to read differently.</p>
+    </div>
+    <div class="stack">
+      <div class="scale">
+        <span class="Aa">Aa</span>
+        <div class="role-list">
+          <span><b>Display</b> — Fraunces, 500, optical size auto</span>
+          <span><b>Body</b> — IBM Plex Sans, 400</span>
+          <span><b>Meta / voice</b> — IBM Plex Mono 400 · Fraunces italic 400</span>
+        </div>
+      </div>
+      <div class="mock">
+        <div class="who">
+          <span class="name">Marisol Kade</span>
+          <span class="handle">@marisol_k · 2m</span>
+        </div>
+        <p class="bio">Marine biologist. Slow mornings. Rereading everything by Le Guin, again.</p>
+        <p class="post">Deleted this three times and I'm posting it anyway: I don't think I've
+        felt this steady in a year. Small thing. Wanted it somewhere that isn't just my head.</p>
+        <span class="notice"><span class="dot"></span>Priya followed you · now</span>
+        <button class="cta">Follow</button>
+      </div>
+      <div class="spec spec-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Family</th><th>Weight / style</th><th>Where</th></tr></thead>
+          <tbody>
+            <tr><td>Display</td><td>Fraunces</td><td>500, upright</td><td>Names, headings</td></tr>
+            <tr><td>Body</td><td>IBM Plex Sans</td><td>400</td><td>Posts, feed copy</td></tr>
+            <tr><td>Voice</td><td>Fraunces</td><td>400, italic</td><td>Bios, captions</td></tr>
+            <tr><td>Utility</td><td>IBM Plex Mono</td><td>400</td><td>Handles, timestamps, notices</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 315.2 -->
+  <section class="rec r-of">
+    <div class="rec-head">
+      <span class="eyebrow rec-code">315.2 — One Family</span>
+      <h2>Newsreader, everywhere</h2>
+      <p class="twist">The twist: <strong>one typeface for the entire product</strong>, the way
+      one hue runs the entire palette. Newsreader is a variable serif with an optical-size axis —
+      at display sizes it's a real headline face, at small sizes its letterforms simplify toward
+      something closer to text type. Hierarchy comes only from size and weight, never a family
+      switch. The most literal echo of "Single Thread," and the boldest bet here.</p>
+    </div>
+    <div class="stack">
+      <div class="scale">
+        <span class="Aa">Aa</span>
+        <div class="role-list">
+          <span><b>Everything</b> — Newsreader, one family</span>
+          <span>opsz 6→72 tracks size automatically</span>
+          <span>weight 400–600 is the only lever</span>
+        </div>
+      </div>
+      <div class="mock">
+        <div class="who">
+          <span class="name">Marisol Kade</span>
+          <span class="handle">@marisol_k · 2m</span>
+        </div>
+        <p class="bio">Marine biologist. Slow mornings. Rereading everything by Le Guin, again.</p>
+        <p class="post">Deleted this three times and I'm posting it anyway: I don't think I've
+        felt this steady in a year. Small thing. Wanted it somewhere that isn't just my head.</p>
+        <span class="notice"><span class="dot"></span>Priya followed you · now</span>
+        <button class="cta">Follow</button>
+      </div>
+      <div class="spec spec-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Family</th><th>Weight / style</th><th>Where</th></tr></thead>
+          <tbody>
+            <tr><td>Display</td><td>Newsreader</td><td>400, opsz 72</td><td>Names, headings</td></tr>
+            <tr><td>Body</td><td>Newsreader</td><td>400, opsz ~20</td><td>Posts, feed copy</td></tr>
+            <tr><td>Voice</td><td>Newsreader</td><td>400, italic</td><td>Bios, captions</td></tr>
+            <tr><td>Utility</td><td>Newsreader</td><td>600, tabular nums, tracked caps</td><td>Handles, timestamps, buttons</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 315.3 -->
+  <section class="rec r-ss">
+    <div class="rec-head">
+      <span class="eyebrow rec-code">315.3 — Signed Sans</span>
+      <h2>Sora + Inter + IBM Plex Mono</h2>
+      <p class="twist">The twist: <strong>mono is reserved for identity, never for prose.</strong>
+      Everything a person writes — posts, bios — sets in a calm humanist sans built for a fast
+      scroll. The one place monospace appears is anything that names or timestamps a person:
+      handles, "2m", follow notices. It functions like a signature, not a font choice — the same
+      way the palette lets Success/Warning/Danger break the single hue only for status, never for
+      brand.</p>
+    </div>
+    <div class="stack">
+      <div class="scale">
+        <span class="Aa">Aa</span>
+        <div class="role-list">
+          <span><b>Display</b> — Sora, 600</span>
+          <span><b>Body</b> — Inter, 400</span>
+          <span><b>Identity</b> — IBM Plex Mono, 400</span>
+        </div>
+      </div>
+      <div class="mock">
+        <div class="who">
+          <span class="name">Marisol Kade</span>
+          <span class="handle">@marisol_k · 2m</span>
+        </div>
+        <p class="bio">Marine biologist. Slow mornings. Rereading everything by Le Guin, again.</p>
+        <p class="post">Deleted this three times and I'm posting it anyway: I don't think I've
+        felt this steady in a year. Small thing. Wanted it somewhere that isn't just my head.</p>
+        <span class="notice"><span class="dot"></span>Priya followed you · now</span>
+        <button class="cta">Follow</button>
+      </div>
+      <div class="spec spec-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>Family</th><th>Weight / style</th><th>Where</th></tr></thead>
+          <tbody>
+            <tr><td>Display</td><td>Sora</td><td>600</td><td>Names, headings, buttons</td></tr>
+            <tr><td>Body</td><td>Inter</td><td>400</td><td>Posts, bios, feed copy</td></tr>
+            <tr><td>Identity</td><td>IBM Plex Mono</td><td>400</td><td>Handles, timestamps, notices only</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="verdict">
+    <span class="eyebrow">Recommendation</span>
+    <h2>Lean toward 315.3</h2>
+    <span class="pick">Signed Sans</span>
+    <p>Single Thread's own god-moment list names "I Can't Stop Checking" — a feed people
+    scroll fast, repeatedly. That favors a workhorse sans over a literary serif at UI sizes: Sora
+    and Inter hold up in a dense, fast-scanning feed in a way a serif's finer detail doesn't at
+    14–15px. The mono-for-identity twist still gives the app a signature without asking every
+    post to carry it.</p>
+    <p><strong>315.1</strong> is the safer runner-up — it already matches the voice of the
+    palette specimen doc, so picking it costs nothing in consistency, and the italic-for-voice
+    idea is worth keeping even if 315.3 wins on family. <strong>315.2</strong> is the one worth
+    prototyping before ruling out: it's the purest expression of "Single Thread" as an idea, but
+    a single serif family carrying buttons, badges, and timestamps is the riskiest bet on
+    legibility at real UI sizes — worth testing on a real screen, not just this specimen, before
+    deciding against it.</p>
+    <p class="muted">Once one is picked, it gets written up the same way the palette was —
+    decision, rationale, and a token table — in <code>kos/decisions/ux/typography.md</code>.</p>
+  </div>
+
+  <footer>Single Thread · type specimen · 2026-09-01 · colors from kos/decisions/ux/color-scheme.md</footer>
+
+</div>

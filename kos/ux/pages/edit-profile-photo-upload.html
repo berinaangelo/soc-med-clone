@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Edit profile — photo upload preview (Phase 2)</title>
+
+<!-- Phase 2 preview, see photo-uploads-preview.md — NOT the committed MVP screen. That's
+     edit-profile.html, left untouched: it's still what profile-editing.md and data-model-schema.md
+     cite for the plain-URL profile_picture field. This file is a full copy of that screen with
+     only the picture field swapped for an Active Storage-style upload widget, same "separate file"
+     convention direct-messages-preview.md and comments-preview.md used for their own new pages.
+
+     God moment check (mockup-guardrails.md): still god-moments.md #3, "This Is Mine" — same as
+     edit-profile.html. This variant exists because pasting a URL fails the grandma test
+     (mvp-scope.md cut #3), not because the god moment changed. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 display, Inter 400 body. No IBM Plex Mono
+     — this screen has no handles/timestamps, same call as edit-profile.html. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — the one hand-authored CSS the guardrails allow:
+     custom properties for tokens, font-family declarations, and the couple of native selectors
+     Tailwind has no utility for. Identical tokens to the rest of the mockup series. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13; /* dark theme's own background, per color-scheme.md's fill-role rule */
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display {
+    font-family: 'Sora', sans-serif;
+  }
+
+  /* Focus rule (tech-stack.md): every interactive element gets a visible 2px accent outline,
+     2px offset. :focus-visible has no Tailwind utility, so it's hand-authored here. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Motion (tech-stack.md): component-only 150ms ease transitions, dropped for reduced motion. */
+  a,
+  button,
+  input,
+  textarea,
+  label {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button,
+    input,
+    textarea,
+    label {
+      transition: none;
+    }
+  }
+
+  /* Visually-hidden but still focusable/labelled — the real file input sits under the styled
+     dropzone rather than being restyled directly (native file-input chrome can't be themed with
+     Tailwind utilities alone). */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail — same shell as edit-profile.html, always logged-in here (requires login +
+         ownership per profile-editing.md). -->
+    <aside class="w-20 shrink-0 sticky top-0 h-screen flex flex-col items-center py-6 gap-2" style="border-right: 1px solid var(--border); background: var(--background);">
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <a href="feed.html" title="Feed" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+        <a href="directory.html" title="Directory" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+        <a href="notifications.html" title="Notifications" class="relative flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full" style="background: var(--accent); border: 2px solid var(--background);"></span>
+        </a>
+      </nav>
+
+      <a href="profile.html" title="Your profile" aria-current="page" class="mt-auto mb-2 shrink-0 rounded-full p-0.5" style="background: var(--primary);">
+        <span id="rail-avatar-fallback" class="hidden w-8 h-8 rounded-full items-center justify-center font-display text-xs font-semibold" style="background: var(--secondary); color: var(--on-fill);">PN</span>
+        <img id="rail-avatar-img" src="https://i.pravatar.cc/64?img=47" alt="" class="w-8 h-8 rounded-full object-cover" />
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <main class="max-w-lg mx-auto px-6 py-10">
+        <div class="flex items-center justify-between gap-4 mb-1">
+          <h1 class="font-display text-2xl font-semibold">Edit profile</h1>
+          <a href="profile.html" class="text-sm font-medium" style="color: var(--muted);">Cancel</a>
+        </div>
+        <!-- Phase 2 preview banner — makes the parked/not-committed status visible on the screen
+             itself, not just in the KOS note, since this file sits right next to the real MVP
+             mockup and could otherwise be mistaken for it. -->
+        <p class="text-xs mb-6" style="color: var(--muted);">
+          Preview — photo upload replaces the pasted-URL field from
+          <a href="edit-profile.html" class="underline underline-offset-2" style="color: var(--secondary);">edit-profile.html</a>.
+          Not committed yet, see photo-uploads-preview.md.
+        </p>
+
+        <form class="rounded-2xl p-6" style="background: var(--surface); border: 1px solid var(--border);" novalidate>
+          <div class="flex flex-col gap-5">
+
+            <!-- Profile picture — Active Storage upload (photo-uploads-preview.md), replacing
+                 edit-profile.html's pasted-URL field. Two states, swapped by JS below:
+                 "attached" (an avatar preview + Replace/Remove text actions) shown by default here
+                 since editing an existing profile with a photo already set is the common case, and
+                 "empty" (the dropzone) once removed or for a profile with nothing set yet. -->
+            <div class="flex flex-col gap-1.5">
+              <span class="text-sm font-medium">Profile photo</span>
+
+              <input
+                id="avatar_file"
+                name="avatar"
+                type="file"
+                accept="image/png, image/jpeg"
+                class="visually-hidden"
+                aria-labelledby="avatar_file_label"
+                onchange="handleFileChosen(this.files)"
+              />
+
+              <!-- Attached state -->
+              <div id="avatar-attached" class="flex items-center gap-4">
+                <span id="preview-fallback" class="hidden w-16 h-16 rounded-full items-center justify-center font-display text-base font-semibold shrink-0" style="background: var(--secondary); color: var(--on-fill);">PN</span>
+                <img id="preview-img" src="https://i.pravatar.cc/128?img=47" alt="" class="w-16 h-16 rounded-full object-cover shrink-0" />
+                <div class="flex-1 min-w-0 flex flex-col gap-1">
+                  <span id="avatar-filename" class="text-sm truncate">golden-hour.jpg</span>
+                  <div class="flex items-center gap-3">
+                    <label id="avatar_file_label" for="avatar_file" class="text-xs font-medium cursor-pointer" style="color: var(--secondary);">Replace photo</label>
+                    <button type="button" onclick="removePhoto()" class="text-xs font-medium" style="color: var(--muted);" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--muted)'">Remove photo</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty state — dropzone, click or drag-and-drop -->
+              <label
+                id="avatar-dropzone"
+                for="avatar_file"
+                class="hidden flex-col items-center justify-center gap-2 rounded-2xl px-4 py-8 text-center cursor-pointer"
+                style="border: 1px dashed var(--border);"
+                ondragover="event.preventDefault(); this.style.borderColor='var(--accent)';"
+                ondragleave="this.style.borderColor='var(--border)';"
+                ondrop="event.preventDefault(); this.style.borderColor='var(--border)'; handleFileChosen(event.dataTransfer.files);"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--muted);">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <span class="text-sm font-medium">Upload a photo</span>
+                <span class="text-xs" style="color: var(--muted);">Drag and drop, or click to browse</span>
+              </label>
+
+              <!-- Neutral hint per iconography.md's form-hint rule: plain text below the field,
+                   --muted, no icon/border-color change/toast. Size/type limits are a mockup
+                   assumption, not a decided validation rule — see photo-uploads-preview.md's
+                   "not decided yet". -->
+              <span class="text-xs" style="color: var(--muted);">JPG or PNG, up to 5MB. Leave unset to use your initials instead.</span>
+              <!-- Error state example, same "shown here for reference" pattern as the Name field
+                   below and edit-profile.html's own error span — a real screen only renders this
+                   after a rejected upload. -->
+              <span class="text-xs hidden" style="color: var(--danger);">That file is too large — photos must be under 5MB.</span>
+            </div>
+
+            <!-- Name — required -->
+            <div class="flex flex-col gap-1.5">
+              <label for="name" class="text-sm font-medium">Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autocomplete="name"
+                required
+                value="Priya Nair"
+                class="rounded-lg px-3 py-2 text-base bg-transparent"
+                style="border: 1px solid var(--border); color: var(--text);"
+              />
+              <span class="text-xs hidden" style="color: var(--danger);">Name can't be blank.</span>
+            </div>
+
+            <!-- Bio — optional, no length cap decided in data-model-schema.md (unlike Posts'
+                 500-char cap), so none is invented here. -->
+            <div class="flex flex-col gap-1.5">
+              <label for="bio" class="text-sm font-medium">Bio</label>
+              <textarea
+                id="bio"
+                name="bio"
+                rows="3"
+                class="rounded-lg px-3 py-2 text-base bg-transparent resize-none"
+                style="border: 1px solid var(--border); color: var(--text);"
+              >Photographer, always chasing golden hour. Currently on a slow trip through the Western Ghats.</textarea>
+              <span class="text-xs" style="color: var(--muted);">Optional.</span>
+            </div>
+
+            <div class="flex items-center gap-3 mt-2">
+              <button
+                type="submit"
+                class="font-display text-sm font-semibold rounded-lg px-4 py-2"
+                style="background: var(--primary); color: var(--on-fill);"
+              >
+                Save changes
+              </button>
+              <a href="profile.html" class="text-sm font-medium rounded-lg px-4 py-2" style="border: 1px solid var(--border); color: var(--text);">
+                Cancel
+              </a>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <!-- Mockup-only — not app UI. Swaps between the "attached" (avatar + Replace/Remove) and
+       "empty" (dropzone) states, reading a real local file via URL.createObjectURL for the
+       preview and nav-rail avatar — no fake network delay simulated, per
+       photo-uploads-preview.md's "not decided yet" note that real upload progress/error states
+       aren't part of this preview. Falls back to the initials circle exactly like
+       edit-profile.html's updateAvatarPreview() does when nothing is attached. -->
+  <script>
+    function setAttachedState(hasPhoto) {
+      document.getElementById('avatar-attached').classList.toggle('hidden', !hasPhoto);
+      const dropzone = document.getElementById('avatar-dropzone');
+      dropzone.classList.toggle('hidden', hasPhoto);
+      dropzone.classList.toggle('flex', !hasPhoto);
+    }
+
+    function handleFileChosen(files) {
+      if (!files || !files.length) return;
+      const file = files[0];
+      const url = URL.createObjectURL(file);
+
+      const img = document.getElementById('preview-img');
+      const fallback = document.getElementById('preview-fallback');
+      const railImg = document.getElementById('rail-avatar-img');
+      const railFallback = document.getElementById('rail-avatar-fallback');
+
+      img.src = url;
+      img.classList.remove('hidden');
+      fallback.classList.add('hidden');
+      fallback.classList.remove('flex');
+      railImg.src = url;
+      railImg.classList.remove('hidden');
+      railFallback.classList.add('hidden');
+      railFallback.classList.remove('flex');
+
+      document.getElementById('avatar-filename').textContent = file.name;
+      setAttachedState(true);
+    }
+
+    function removePhoto() {
+      const fallback = document.getElementById('preview-fallback');
+      const railFallback = document.getElementById('rail-avatar-fallback');
+
+      document.getElementById('preview-img').classList.add('hidden');
+      fallback.classList.remove('hidden');
+      fallback.classList.add('flex');
+      document.getElementById('rail-avatar-img').classList.add('hidden');
+      railFallback.classList.remove('hidden');
+      railFallback.classList.add('flex');
+
+      document.getElementById('avatar_file').value = '';
+      setAttachedState(false);
+    }
+  </script>
+
+</body>
+</html>

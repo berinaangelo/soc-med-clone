@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Notifications — mockup</title>
+
+<!-- God moment check (mockup-guardrails.md): this is god-moments.md #1, "Someone Noticed Me" —
+     the full list behind the bell icon's dot badge (notifications-ui.md). MVP notifications are
+     follow-only (mvp-scope.md), so most rows here are "X followed you." Job: land each row's
+     identity clearly enough that the viewer wants to go look back — the actor's name/avatar link
+     through to their profile, which is where Follow actually lives (directory.html's decision:
+     "no follow button here, Follow lives on the profile page"). No per-row unread styling and no
+     "mark all as read" button: notifications-ui.md decided that flip happens automatically on
+     page visit, not as a manual action, so by the time this page is rendered everything already
+     reads as read — the rail's own bell badge below reflects that (no dot, unlike feed.html's
+     rail which shows the unread dot as a demo of the *other* pages' state).
+
+     Two more row types added per friend-requests-preview.md (2026-09-02, not committed like
+     everything else in that file), both info-only — no inline actions on either, revised the same
+     day once the user flagged a real flooding risk in mixing an actionable list into this FYI
+     stream: "X sent you a friend request" and "X accepted your friend request," both shaped
+     exactly like an ordinary follow notice. Accepting/declining now happens on the dedicated
+     [friend requests page](friend-requests.html) only — that page's own god-moment note explains
+     why an accepted request is a stronger version of this same moment (mutual, not
+     one-directional).
+
+     Cast reused from feed.html on purpose (Priya, Marcus, Grace, Ana, Leo, plus Jun Tanaka for the
+     new friend-request row) — same social graph across every mockup, so the app reads as one
+     coherent whole rather than disconnected screens. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 display, Inter 400 body, IBM Plex Mono 400
+     for the timestamps, same trio as feed.html since this screen also has handles/timestamps. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — identical tokens to feed.html/directory.html/profile.html. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13;
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display {
+    font-family: 'Sora', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  /* Focus rule (tech-stack.md): every interactive element gets a visible 2px accent outline. */
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Motion (tech-stack.md): component-only 150ms ease transitions, dropped for reduced motion. */
+  a,
+  button {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button {
+      transition: none;
+    }
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail — identical to feed.html/profile.html/directory.html's logged-in rail. -->
+    <aside
+      class="w-20 shrink-0 sticky top-0 h-screen flex flex-col items-center py-6 gap-2"
+      style="border-right: 1px solid var(--border); background: var(--background);"
+    >
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <!-- Feed -->
+        <a
+          href="feed.html"
+          title="Feed"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+
+        <!-- Directory -->
+        <a
+          href="directory.html"
+          title="Directory"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+
+        <!-- Notifications — current tab: solid primary chip per iconography.md's Signal Weight
+             rule, same treatment feed.html gives Feed. No dot badge here — mark-all-as-read
+             fires on visiting this page (notifications-ui.md), so by the time it's rendered
+             there's nothing unread left to flag. -->
+        <a
+          href="notifications.html"
+          aria-current="page"
+          title="Notifications"
+          class="flex items-center justify-center p-1.5 rounded-full"
+          style="background: var(--primary);"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color: var(--on-fill);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+        </a>
+
+        <!-- Friend requests — new (friend-requests-preview.md), back-ported across every page
+             mockup carrying this rail, same convention Messages used. Person + checkmark, not
+             Directory's two-person glyph, to stay unambiguous one slot away from it. No unread
+             badge, same no-badge precedent Messages already set. -->
+        <a
+          href="friend-requests.html"
+          title="Friend requests"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M15 11.5l2 2 4-4.5" />
+          </svg>
+        </a>
+
+        <!-- Messages — new (direct-messages-preview.md), back-ported across every page mockup
+             carrying this rail. Last in the rail, above the avatar: the one nav item with no
+             god-moment tie, kept after the three that do have one. Lucide "mail," not
+             message-circle (already spoken for by Comments). -->
+        <a
+          href="messages.html"
+          title="Messages"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+          </svg>
+        </a>
+      </nav>
+
+      <!-- Profile — the viewer's own avatar, per iconography.md's avatar rule. -->
+      <a href="profile.html" title="Your profile" class="mt-auto mb-2 shrink-0 rounded-full">
+        <span
+          class="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-semibold"
+          style="background: var(--secondary); color: var(--on-fill);"
+        >
+          YK
+        </span>
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <main class="max-w-2xl mx-auto px-6 py-10">
+        <div class="flex items-start justify-between gap-4 mb-6">
+          <h1 class="font-display text-2xl font-semibold">Notifications</h1>
+          <!-- Mockup-only state toggle — same pattern as feed.html/directory.html/profile.html:
+               lets this one file demonstrate both the populated list and the empty state. -->
+          <button
+            type="button"
+            onclick="document.getElementById('notif-list').classList.toggle('hidden');
+                      document.getElementById('notif-empty').classList.toggle('hidden');
+                      document.getElementById('notif-empty').classList.toggle('flex');
+                      this.textContent = this.textContent.startsWith('Preview') ? 'Back to notifications' : 'Preview empty state';"
+            class="text-xs font-medium rounded-lg px-3 py-1.5 shrink-0"
+            style="border: 1px solid var(--border); color: var(--muted);"
+          >
+            Preview empty state
+          </button>
+        </div>
+
+        <!-- Notification list — reverse-chronological, follow alerts only (mvp-scope.md: "no
+             self-notify," and the only action type MVP ships is "follow" per data-model-schema.md).
+             Row format reuses the exact "notice" shape typography.md's specimen established for
+             follow notices (leading accent dot, name, "followed you," mono timestamp) rather than
+             inventing new row chrome — notifications-ui.md left row layout open, so this is the
+             simplest read of what's already decided, not a new design. Avatar and name both link
+             to the actor's profile, since that's where Follow itself lives (directory.html) — this
+             page's job is just surfacing who noticed you, not re-hosting the Follow control. -->
+        <div id="notif-list" class="flex flex-col gap-3">
+
+          <!-- Priya — profile_picture set, just now -->
+          <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <a href="profile.html" class="shrink-0">
+              <img src="https://i.pravatar.cc/96?img=47" alt="" class="w-10 h-10 rounded-full object-cover" />
+            </a>
+            <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+              <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--accent);"></span>
+              <p class="text-base min-w-0">
+                <a href="profile.html" class="font-display font-semibold hover:underline">Priya Nair</a>
+                <span> followed you</span>
+              </p>
+            </div>
+            <span class="font-mono text-xs shrink-0" style="color: var(--muted);">now</span>
+          </article>
+
+          <!-- Marcus — initials avatar fallback -->
+          <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <a href="profile.html" class="shrink-0">
+              <span
+                class="w-10 h-10 rounded-full flex items-center justify-center font-display text-sm font-semibold"
+                style="background: var(--secondary); color: var(--on-fill);"
+              >
+                MO
+              </span>
+            </a>
+            <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+              <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--accent);"></span>
+              <p class="text-base min-w-0">
+                <a href="profile.html" class="font-display font-semibold hover:underline">Marcus Ostrander</a>
+                <span> followed you</span>
+              </p>
+            </div>
+            <span class="font-mono text-xs shrink-0" style="color: var(--muted);">1h</span>
+          </article>
+
+          <!-- Grace — profile_picture set -->
+          <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <a href="profile.html" class="shrink-0">
+              <img src="https://i.pravatar.cc/96?img=32" alt="" class="w-10 h-10 rounded-full object-cover" />
+            </a>
+            <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+              <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--accent);"></span>
+              <p class="text-base min-w-0">
+                <a href="profile.html" class="font-display font-semibold hover:underline">Grace Odhiambo</a>
+                <span> followed you</span>
+              </p>
+            </div>
+            <span class="font-mono text-xs shrink-0" style="color: var(--muted);">4h</span>
+          </article>
+
+          <!-- Ana — initials avatar fallback, a day old -->
+          <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <a href="profile.html" class="shrink-0">
+              <span
+                class="w-10 h-10 rounded-full flex items-center justify-center font-display text-sm font-semibold"
+                style="background: var(--secondary); color: var(--on-fill);"
+              >
+                AR
+              </span>
+            </a>
+            <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+              <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--accent);"></span>
+              <p class="text-base min-w-0">
+                <a href="profile.html" class="font-display font-semibold hover:underline">Ana Rodrigues</a>
+                <span> followed you</span>
+              </p>
+            </div>
+            <span class="font-mono text-xs shrink-0" style="color: var(--muted);">1d</span>
+          </article>
+
+          <!-- Leo — oldest, several days back -->
+          <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <a href="profile.html" class="shrink-0">
+              <img src="https://i.pravatar.cc/96?img=15" alt="" class="w-10 h-10 rounded-full object-cover" />
+            </a>
+            <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+              <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--accent);"></span>
+              <p class="text-base min-w-0">
+                <a href="profile.html" class="font-display font-semibold hover:underline">Leo Fischer</a>
+                <span> followed you</span>
+              </p>
+            </div>
+            <span class="font-mono text-xs shrink-0" style="color: var(--muted);">3d</span>
+          </article>
+
+          <!-- Incoming friend request — friend-requests-preview.md. Info-only, same "notice" row
+               shape as every row here (revised 2026-09-02: no inline Accept/Decline anymore — that
+               action lives only on friend-requests.html now, to keep this list from flooding with
+               actionable rows as request volume grows). Avatar/name still link to the actor's
+               profile, same rule as every other row. -->
+          <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <a href="profile.html" class="shrink-0">
+              <span class="w-10 h-10 rounded-full flex items-center justify-center font-display text-sm font-semibold" style="background: var(--secondary); color: var(--on-fill);">JT</span>
+            </a>
+            <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+              <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--accent);"></span>
+              <p class="text-base min-w-0">
+                <a href="profile.html" class="font-display font-semibold hover:underline">Jun Tanaka</a>
+                <span> sent you a friend request</span>
+              </p>
+            </div>
+            <span class="font-mono text-xs shrink-0" style="color: var(--muted);">2h</span>
+          </article>
+
+          <!-- Accepted — info-only, identical shape to an ordinary follow notice, no actions
+               (the relationship is already settled by the time this renders). Ana already
+               appears above as a follow notice — reused here, same initials-fallback avatar, both
+               plausible from the same person over time (followed you, later accepted a request). -->
+          <article class="rounded-2xl p-5 flex items-center gap-3" style="background: var(--surface); border: 1px solid var(--border);">
+            <a href="profile.html" class="shrink-0">
+              <span class="w-10 h-10 rounded-full flex items-center justify-center font-display text-sm font-semibold" style="background: var(--secondary); color: var(--on-fill);">AR</span>
+            </a>
+            <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+              <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: var(--accent);"></span>
+              <p class="text-base min-w-0">
+                <a href="profile.html" class="font-display font-semibold hover:underline">Ana Rodrigues</a>
+                <span> accepted your friend request</span>
+              </p>
+            </div>
+            <span class="font-mono text-xs shrink-0" style="color: var(--muted);">4d</span>
+          </article>
+        </div>
+
+        <!-- Empty state — exact copy from empty-states.md's "No notifications yet" row: icon
+             i-bell (same glyph as the rail's own bell, drawn bigger/muted per that decision's
+             icon rule), heading, subtext, no CTA — a wait state, not a dead end, per
+             empty-states.md's explicit call on this one. Doors into god-moments.md #1. -->
+        <div id="notif-empty" class="hidden flex-col items-center text-center gap-2 py-20">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10" style="color: var(--muted);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <p class="font-display text-lg font-semibold">No notifications yet</p>
+          <p class="text-sm" style="color: var(--muted);">You'll see it here the moment someone follows you.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

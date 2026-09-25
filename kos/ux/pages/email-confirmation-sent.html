@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Check your email — mockup (Phase 2 preview)</title>
+
+<!-- Phase 2 preview, see email-confirmation-preview.md — NOT committed, not being built now.
+     Reached from signup.html's submit, once Devise's confirmable module holds a fresh account
+     until its emailed link is clicked (real flow this stands in for: confirmable sends a
+     confirmation_token-bearing link via letter_opener in development, same delivery setup
+     devise-modules.md already uses for recoverable's reset email). No real email is sent by this
+     static page — the "Resend" action below is a mockup placeholder with nowhere to submit.
+
+     Entry-point wiring from signup.html is left open this pass, per mockup-guardrails.md's
+     one-screen-at-a-time rule — same convention privacy-settings.html/security-settings.html used
+     for their own open wiring.
+
+     God moment check (mockup-guardrails.md): none of god-moments.md's 5 entries — supporting
+     infrastructure, same allowance as the rest of the auth chain (signup/login/forgot-password). -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 for display, Inter 400 for body.
+     IBM Plex Mono (identity-only: handles/timestamps/follow-notices) is intentionally not
+     loaded — this screen has no handles or timestamps. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — identical tokens to every other mockup. */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13; /* dark theme's own background, per color-scheme.md's fill-role rule */
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display {
+    font-family: 'Sora', sans-serif;
+  }
+
+  /* Focus rule (tech-stack.md): every interactive element gets a visible 2px accent outline,
+     2px offset. :focus-visible has no Tailwind utility, so it's hand-authored here. */
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Motion (tech-stack.md): component-only 150ms ease transitions, dropped for reduced motion. */
+  a,
+  button {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button {
+      transition: none;
+    }
+  }
+</style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <main class="w-full max-w-sm">
+    <div
+      class="rounded-2xl p-8 text-center"
+      style="background: var(--surface); border: 1px solid var(--border);"
+    >
+      <p class="text-xs mb-4" style="color: var(--muted);">
+        Preview — not committed yet, see
+        <span class="font-medium" style="color: var(--secondary);">email-confirmation-preview.md</span>.
+      </p>
+
+      <!-- Mail icon (outline, Signal Weight at-rest state) — reused geometry from the existing
+           Messages nav icon, in a plain circle rather than a solid chip since it's not signaling
+           unread/current-tab state. -->
+      <div class="mx-auto mb-5 w-14 h-14 rounded-full flex items-center justify-center" style="background: var(--background);">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6" style="color: var(--primary);">
+          <rect x="2" y="4" width="20" height="16" rx="2" />
+          <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+        </svg>
+      </div>
+
+      <h1 class="font-display text-2xl font-semibold mb-2">Check your email</h1>
+      <p class="text-sm mb-6" style="color: var(--muted);">
+        We sent a confirmation link to
+        <span style="color: var(--text);">alex@example.com</span>.
+        Click it to activate your account.
+      </p>
+
+      <button
+        type="button"
+        class="font-display text-sm font-semibold rounded-lg py-2.5 w-full"
+        style="background: var(--primary); color: var(--on-fill);"
+      >
+        Resend confirmation email
+      </button>
+    </div>
+
+    <p class="text-center text-sm mt-6" style="color: var(--muted);">
+      Wrong email or already confirmed?
+      <a href="login.html" class="font-medium" style="color: var(--primary);">Back to log in</a>
+    </p>
+  </main>
+
+</body>
+</html>

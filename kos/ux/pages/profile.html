@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Profile — mockup</title>
+
+<!-- God moment check (mockup-guardrails.md): god-moments.md #3, "This Is Mine" — a profile that
+     reads as personal space, not a database record. The own-profile state (edit/delete on your
+     posts, no Follow clutter, a real "write your first post" door when it's empty) is where that
+     actually has to land; the other-person states (Follow/Following, no post controls) exist so
+     the same screen also serves god-moments.md #2's browsing-to-follow flow.
+
+     Public page per public-vs-authenticated-pages.md — no login required to view. Only the Follow
+     control and the owner-only post actions change with who's looking, per the three viewer
+     states this file's second toggle cycles through. Content stays the same person (Priya Nair,
+     already introduced in directory.html/feed.html) across all three states — the toggle
+     demonstrates each rendered state of the Follow-control/post-actions region, not a literal
+     "Priya becomes the logged-in viewer" story; the rail's own avatar (YK, same as the other two
+     mockups) stays the generic logged-in-viewer placeholder throughout.
+
+     Redraw v2: user asked for the section *placement* of a reference MySpace-style profile
+     (two-column header — wide identity card + a narrow side panel — then full-width banded
+     sections stacked below) while keeping every already-decided system rule (palette/type/
+     iconography/spacing/flat-no-shadow) as-is. Only content that already exists in the schema
+     moved into that shape: the identity card keeps its exact fields, and Posts is now one banded
+     container (header label + divided rows) instead of separate floating cards, echoing the
+     reference's "Bulletin Board" block. The reference's other bands (Interests/Music/Who I'd Like
+     to Meet, etc.) aren't in data-model-schema.md, so they're not built — inventing them wasn't
+     what "just the placement" asked for. The side panel is new content, but not new *data*: a
+     small "Recent followers" avatar grid, derived from the same Follow rows the existing
+     follower count already reads, not a schema addition. Nav rail placement stays exactly as
+     decided — out of scope for this pass per the user's own note. -->
+
+<!-- Tailwind via CDN, no build step, per mockup-guardrails.md -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Fonts per typography.md ("Signed Sans"): Sora 600 display, Inter 400 body, IBM Plex Mono 400
+     for the @handle under the display name (identity-only, never prose — same rule feed.html
+     already applies to post timestamps). -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Inter:wght@400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+
+<style>
+  /* Single Thread palette (color-scheme.md) — the one hand-authored CSS the guardrails allow:
+     custom properties for tokens, font-family declarations, and the couple of native selectors
+     Tailwind has no utility for. Identical tokens to directory.html/feed.html, plus
+     --tint-secondary (new on this page — the "Following" button's fill, per iconography.html's
+     Signal Weight (.r-sw) spec: same rgba(secondary) wash used there for the followed state). */
+  :root {
+    --primary: #762D64;
+    --secondary: #9F568D;
+    --accent: #CA21A0;
+    --danger: #BE2D39;
+    --text: #2B2229;
+    --muted: #74636F;
+    --surface: #F9F6F8;
+    --background: #FAF9FA;
+    --border: #E7E0E5;
+    --on-fill: #FFFFFF;
+    --tint-secondary: rgba(159, 86, 141, 0.15);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary: #D369B9;
+      --secondary: #CA91BC;
+      --accent: #E444BC;
+      --danger: #D4545E;
+      --text: #EDE9EC;
+      --muted: #A696A2;
+      --surface: #21181E;
+      --background: #140F13;
+      --border: #574252;
+      --on-fill: #140F13; /* dark theme's own background, per color-scheme.md's fill-role rule */
+      --tint-secondary: rgba(202, 145, 188, 0.16);
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+
+  .font-display {
+    font-family: 'Sora', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  /* Focus rule (tech-stack.md): every interactive element gets a visible 2px accent outline,
+     2px offset. :focus-visible has no Tailwind utility, so it's hand-authored here. */
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Motion (tech-stack.md): component-only 150ms ease transitions, dropped for reduced motion. */
+  a,
+  button {
+    transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  }
+
+  /* Like-button pop (likes-preview.md) — see feed.html for the full reasoning; same rule reused
+     verbatim so the click feels identical wherever the like affordance appears. */
+  @keyframes like-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+  .like-pop {
+    /* SVG elements default transform-origin to their own viewBox, not their rendered box (a
+       cross-browser inconsistency for scale() specifically) — pin both explicitly so the pop
+       always scales from the icon's visual center. */
+    transform-box: border-box;
+    transform-origin: center;
+    animation: like-pop 150ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button {
+      transition: none;
+    }
+    dialog,
+    dialog::backdrop {
+      transition: none;
+    }
+    .like-pop {
+      animation: none;
+    }
+  }
+
+  /* Delete-confirm dialog (modal-dialog.md): native <dialog>, no JS library. Flat panel — surface
+     background, border, no shadow — dimmed --text backdrop does the separation instead of
+     elevation. Open/close is a 150ms ease fade + small scale-in on the panel, fade on the
+     backdrop; :dialog and ::backdrop have no Tailwind utility, so both are hand-authored here. */
+  dialog#delete-confirm-dialog {
+    padding: 0;
+    border: none;
+    border-radius: 1rem;
+    background: var(--surface);
+    color: var(--text);
+    opacity: 0;
+    transform: scale(0.97);
+    transition: opacity 150ms ease, transform 150ms ease, overlay 150ms ease allow-discrete, display 150ms ease allow-discrete;
+  }
+  dialog#delete-confirm-dialog[open] {
+    opacity: 1;
+    transform: scale(1);
+  }
+  @starting-style {
+    dialog#delete-confirm-dialog[open] {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+  dialog#delete-confirm-dialog::backdrop {
+    background: var(--text);
+    opacity: 0;
+    transition: opacity 150ms ease allow-discrete;
+  }
+  dialog#delete-confirm-dialog[open]::backdrop {
+    opacity: 0.35;
+  }
+  @starting-style {
+    dialog#delete-confirm-dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+  <div class="flex">
+    <!-- Left icon-rail (logged-in state only) — same pattern as feed.html/directory.html. None
+         of the three main tabs is "current" on this page (Profile has no dedicated nav icon —
+         the viewer's own avatar at the bottom of the rail *is* the entry point to it), so the
+         current-tab treatment lands on that avatar instead: a primary-color ring (padding +
+         fill, not a box-shadow, per tech-stack.md's no-shadow rule) around it on this page only. -->
+    <aside
+      id="rail-logged-in"
+      class="hidden w-20 shrink-0 sticky top-0 h-screen flex-col items-center py-6 gap-2"
+      style="border-right: 1px solid var(--border); background: var(--background);"
+    >
+      <nav class="flex flex-col items-center gap-2" aria-label="Primary">
+        <!-- Feed -->
+        <a
+          href="feed.html"
+          title="Feed"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+          </svg>
+        </a>
+
+        <!-- Directory -->
+        <a
+          href="directory.html"
+          title="Directory"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        </a>
+
+        <!-- Notifications — unread: solid primary chip (iconography.md's "unread bell" chip
+             state) plus the accent corner dot on top, per notifications-ui.md. Full read/unread
+             toggle lives in components/nav.html. -->
+        <a
+          href="notifications.html"
+          title="Notifications"
+          class="relative flex items-center justify-center p-1.5 rounded-full"
+          style="background: var(--primary);"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="color: var(--on-fill);">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full" style="background: var(--accent); border: 2px solid var(--background);"></span>
+        </a>
+
+        <!-- Friend requests — new (friend-requests-preview.md), back-ported across every page
+             mockup carrying this rail, same convention Messages used. Person + checkmark, not
+             Directory's two-person glyph, to stay unambiguous one slot away from it. No unread
+             badge, same no-badge precedent Messages already set. -->
+        <a href="friend-requests.html" title="Friend requests" class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M15 11.5l2 2 4-4.5" />
+          </svg>
+        </a>
+
+        <!-- Messages — new (direct-messages-preview.md), back-ported across every page mockup
+             carrying this rail. Last in the rail, above the avatar: the one nav item with no
+             god-moment tie, kept after the three that do have one. Lucide "mail," not
+             message-circle (already spoken for by Comments). -->
+        <a
+          href="messages.html"
+          title="Messages"
+          class="flex items-center justify-center p-1.5 rounded-full hover:bg-[var(--surface)]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5" style="color: var(--text);">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
+          </svg>
+        </a>
+      </nav>
+
+      <!-- Profile — the viewer's own avatar, current-tab ring since this page is the Profile
+           section (iconography.md's avatar rule + the current-tab chip rule, combined: a solid
+           chip doesn't read on top of a photo/initials fill the way it does on an outline icon,
+           so the "current" signal is a ring around the avatar instead). -->
+      <a href="#" title="Your profile" aria-current="page" class="mt-auto mb-2 shrink-0 rounded-full p-0.5" style="background: var(--primary);">
+        <span
+          class="w-8 h-8 rounded-full flex items-center justify-center font-display text-xs font-semibold"
+          style="background: var(--secondary); color: var(--on-fill);"
+        >
+          YK
+        </span>
+      </a>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <!-- Top bar (logged-out state, default) — same two entry points as directory.html's
+           logged-out header, since Profile is public per public-vs-authenticated-pages.md and
+           needs the same pair for a guest visitor. -->
+      <header id="header-logged-out" class="flex items-center justify-end gap-4 px-6 py-4" style="border-bottom: 1px solid var(--border);">
+        <a href="login.html" class="text-sm font-medium" style="color: var(--primary);">Log in</a>
+        <a
+          href="signup.html"
+          class="font-display text-sm font-semibold rounded-lg px-4 py-2"
+          style="background: var(--primary); color: var(--on-fill);"
+        >
+          Sign up
+        </a>
+      </header>
+
+      <main class="max-w-4xl mx-auto px-6 py-10">
+
+        <!-- Mockup-only state toggles — not app UI, same pattern as directory.html/feed.html: let
+             this one file demonstrate every state without separate HTML files. Real app has none
+             of these controls; each state renders itself from actual session/ownership data. -->
+        <div class="flex items-center justify-end gap-2 flex-wrap mb-6">
+          <button
+            type="button"
+            id="toggle-login-btn"
+            onclick="toggleLoggedIn()"
+            class="text-xs font-medium rounded-lg px-3 py-1.5"
+            style="border: 1px solid var(--border); color: var(--muted);"
+          >
+            Preview logged-in view
+          </button>
+          <button
+            type="button"
+            id="toggle-view-btn"
+            onclick="cycleViewState()"
+            class="text-xs font-medium rounded-lg px-3 py-1.5"
+            style="border: 1px solid var(--border); color: var(--muted);"
+          >
+            Preview: already following
+          </button>
+          <!-- Independent of the Follow toggle above — friend-requests-preview.md's relationship
+               is a second, opt-in layer alongside Follow, not a replacement, so it gets its own
+               cycle rather than folding into viewState. -->
+          <button
+            type="button"
+            id="toggle-friend-btn"
+            onclick="cycleFriendState()"
+            class="text-xs font-medium rounded-lg px-3 py-1.5"
+            style="border: 1px solid var(--border); color: var(--muted);"
+          >
+            Preview: request sent
+          </button>
+          <button
+            type="button"
+            id="toggle-empty-btn"
+            onclick="toggleEmpty()"
+            class="text-xs font-medium rounded-lg px-3 py-1.5"
+            style="border: 1px solid var(--border); color: var(--muted);"
+          >
+            Preview empty state
+          </button>
+        </div>
+
+        <!-- Header row — two columns per the reference layout's placement: wide identity card
+             (left) + a narrow side panel (right), stacking to one column below `lg`. -->
+        <div class="flex flex-col lg:flex-row items-stretch gap-4 mb-8">
+
+          <!-- Identity card — name, bio, picture, follower/following counts, Follow control
+               (data-model-schema.md's exact field set: name required, bio optional,
+               profile_picture optional URL; this card uses the set-picture case, directory.html
+               already covers the initials-fallback and no-bio cases for the same field set). -->
+          <div class="flex-1 min-w-0 w-full rounded-2xl p-6 flex flex-col sm:flex-row items-start gap-5" style="background: var(--surface); border: 1px solid var(--border);">
+            <img
+              src="https://i.pravatar.cc/150?img=47"
+              alt=""
+              class="w-20 h-20 rounded-full object-cover shrink-0"
+            />
+            <div class="flex-1 min-w-0 w-full">
+              <div class="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <h1 class="font-display text-2xl font-semibold">Priya Nair</h1>
+                  <p class="font-mono text-sm" style="color: var(--muted);">@priya_n</p>
+                </div>
+
+                <!-- Follow control region — four mutually exclusive states, per the toggle above:
+                     not following (Accent-filled "Follow", per color-scheme.md's Accent = "Follow
+                     button" role), following ("--tint-secondary" fill per iconography.md's Signal
+                     Weight followed-state spec), own profile (a neutral/outline "Edit profile" link
+                     into edit-profile.html, per profile-editing.md's decided entry point), or
+                     hidden entirely for a logged-out guest. -->
+                <button
+                  type="button"
+                  id="follow-btn-not-following"
+                  class="font-display text-sm font-semibold rounded-lg px-4 py-2 inline-flex items-center gap-2 shrink-0"
+                  style="background: var(--accent); color: var(--on-fill);"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <circle cx="9" cy="8" r="3.5" />
+                    <path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6" />
+                    <path d="M18 8v6M15 11h6" />
+                  </svg>
+                  Follow
+                </button>
+                <button
+                  type="button"
+                  id="follow-btn-following"
+                  class="hidden font-display text-sm font-semibold rounded-lg px-4 py-2 inline-flex items-center gap-2 shrink-0"
+                  style="background: var(--tint-secondary); color: var(--secondary);"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <circle cx="9" cy="8" r="3.5" />
+                    <path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6" />
+                    <path d="M15 11.5l2 2 4-4.5" />
+                  </svg>
+                  Following
+                </button>
+                <a
+                  href="edit-profile.html"
+                  id="edit-profile-btn"
+                  class="hidden font-display text-sm font-semibold rounded-lg px-4 py-2 items-center gap-2 shrink-0"
+                  style="border: 1px solid var(--border); color: var(--text);"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M4 20l.7-3.5L15.5 5.7l2.8 2.8L7.5 19.3 4 20z" />
+                    <path d="M13.8 7.4l2.8 2.8" />
+                  </svg>
+                  Edit profile
+                </a>
+
+                <!-- Friend-request control region — friend-requests-preview.md, alongside Follow
+                     not replacing it. Four mutually exclusive states via friendState (independent
+                     of Follow's own viewState), hidden for guest/own-profile same as Follow. The
+                     two-person icon throughout is the same glyph already established for
+                     Directory/nav and privacy-settings.html's "Friends" option — reused so it
+                     reads as distinct from Follow's single-person-plus icon right next to it. -->
+                <button
+                  type="button"
+                  id="friend-btn-none"
+                  onclick="setFriendState(1)"
+                  class="font-display text-sm font-semibold rounded-lg px-4 py-2 inline-flex items-center gap-2 shrink-0"
+                  style="border: 1px solid var(--border); color: var(--text);"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Add friend
+                </button>
+                <button
+                  type="button"
+                  id="friend-btn-sent"
+                  onclick="setFriendState(0)"
+                  class="hidden font-display text-sm font-semibold rounded-lg px-4 py-2 inline-flex items-center gap-2 shrink-0"
+                  style="border: 1px solid var(--border); color: var(--muted);"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Request sent
+                </button>
+                <!-- Received state — a single link into friend-requests.html, not inline
+                     Accept/Decline (revised 2026-09-02: that's the one and only place those
+                     actions live now, see friend-requests-preview.md — keeps this profile-page
+                     control from duplicating an action surface that has to scale). -->
+                <a
+                  href="friend-requests.html"
+                  id="friend-btn-received"
+                  class="hidden font-display text-sm font-semibold rounded-lg px-4 py-2 items-center gap-2 shrink-0"
+                  style="border: 1px solid var(--border); color: var(--text);"
+                >
+                  Review request
+                </a>
+                <button
+                  type="button"
+                  id="friend-btn-friends"
+                  class="hidden font-display text-sm font-semibold rounded-lg px-4 py-2 inline-flex items-center gap-2 shrink-0"
+                  style="background: var(--tint-secondary); color: var(--secondary);"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Friends
+                </button>
+              </div>
+
+              <p class="text-base mt-3" style="color: var(--text);">
+                Photographer, always chasing golden hour. Currently on a slow trip through the
+                Western Ghats.
+              </p>
+
+              <div class="flex items-center gap-5 mt-4 text-sm">
+                <span><span class="font-display font-semibold">128</span> <span style="color: var(--muted);">Followers</span></span>
+                <span><span class="font-display font-semibold">94</span> <span style="color: var(--muted);">Following</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent followers — the side panel's content, standing in for the reference's
+               "Friends" box. Not a new data type: the same Follow rows the "128 Followers" count
+               above already reads, just previewing a handful of them. Public regardless of viewer
+               state, same as the count itself (public-vs-authenticated-pages.md). Cast reused from
+               feed.html/notifications.html for continuity — Priya can't appear here herself
+               (no self-follow, data-model-schema.md). Each avatar would route to that follower's
+               own profile in the real app; "#" here since this mockup only has the one profile
+               file to link to. -->
+          <div class="w-full lg:w-56 shrink-0 rounded-2xl p-5" style="background: var(--surface); border: 1px solid var(--border);">
+            <h2 class="font-display text-sm font-semibold uppercase tracking-wide mb-3" style="color: var(--muted);">Recent followers</h2>
+            <div class="grid grid-cols-2 gap-3">
+              <a href="#" class="flex flex-col items-center gap-1 text-center rounded-lg p-1 hover:bg-[var(--border)]" title="Marcus Ostrander">
+                <span class="w-10 h-10 rounded-full flex items-center justify-center font-display text-xs font-semibold" style="background: var(--secondary); color: var(--on-fill);">MO</span>
+                <span class="text-[11px] font-medium truncate w-full">Marcus</span>
+              </a>
+              <a href="#" class="flex flex-col items-center gap-1 text-center rounded-lg p-1 hover:bg-[var(--border)]" title="Grace Odhiambo">
+                <img src="https://i.pravatar.cc/96?img=32" alt="" class="w-10 h-10 rounded-full object-cover" />
+                <span class="text-[11px] font-medium truncate w-full">Grace</span>
+              </a>
+              <a href="#" class="flex flex-col items-center gap-1 text-center rounded-lg p-1 hover:bg-[var(--border)]" title="Ana Rodrigues">
+                <span class="w-10 h-10 rounded-full flex items-center justify-center font-display text-xs font-semibold" style="background: var(--secondary); color: var(--on-fill);">AR</span>
+                <span class="text-[11px] font-medium truncate w-full">Ana</span>
+              </a>
+              <a href="#" class="flex flex-col items-center gap-1 text-center rounded-lg p-1 hover:bg-[var(--border)]" title="Leo Fischer">
+                <img src="https://i.pravatar.cc/96?img=15" alt="" class="w-10 h-10 rounded-full object-cover" />
+                <span class="text-[11px] font-medium truncate w-full">Leo</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Posts — now one banded container (header label + divided rows) instead of separate
+             floating cards, per the reference layout's "Bulletin Board" placement — the individual
+             post articles no longer carry their own rounded/border/background, the outer wrapper
+             does, and divide-y draws the row separators. Content is unchanged from before: this
+             person's posts, no thread connector (that motif is Feed-only). On the owner's own
+             profile, each post also gets the edit/delete icon-tile pair (w-5 h-5 icon, p-2 chip,
+             rounded-full — sizing per iconography.md's post-actions spec, though the delete hover
+             is a neutral --border chip matching edit, not the spec's danger-fill hover, per
+             explicit request) — hidden for every other viewer state. Empty states sit inside the
+             same band so the "Posts" label still frames them. -->
+        <div class="rounded-2xl overflow-hidden mb-8" style="border: 1px solid var(--border); background: var(--surface);">
+          <div class="px-5 py-3" style="border-bottom: 1px solid var(--border);">
+            <h2 class="font-display text-sm font-semibold uppercase tracking-wide" style="color: var(--muted);">Posts</h2>
+          </div>
+
+        <div id="posts-list" class="flex flex-col divide-y divide-[var(--border)]">
+
+          <article class="p-5 flex items-start gap-3">
+            <img src="https://i.pravatar.cc/96?img=47" alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
+            <div class="flex-1 min-w-0">
+              <div id="post1-view" class="flex flex-col gap-1.5">
+                <span class="font-mono text-xs" style="color: var(--muted);">2h</span>
+                <p class="text-base" style="color: var(--text);">
+                  Golden hour in the Western Ghats tonight. Forgot how quiet it gets up here — no
+                  signal, no notifications, just the light doing its thing.
+                </p>
+                <!-- PHASE 2 PREVIEW addition (comments-preview.md): comment-count affordance,
+                     same icon/format as feed.html's. This is the one post with a matching
+                     post.html detail page, so it's the only real link among the three below.
+                     Like affordance (likes-preview.md) added in the same row; same liked/count
+                     state as feed.html's Post 1 since it's the same post reused byte-for-byte. -->
+                <div class="flex items-center gap-4 mt-1">
+                  <button type="button" id="like-btn-1" onclick="toggleLike(1)" class="inline-flex items-center gap-1.5 text-sm" style="color: var(--secondary);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+                      <path d="M7 10v12" />
+                    </svg>
+                    <span id="like-count-1">12</span> likes
+                  </button>
+                  <a href="post.html" class="inline-flex items-center gap-1.5 text-sm hover:text-[var(--text)]" style="color: var(--muted);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                    </svg>
+                    3 comments
+                  </a>
+                </div>
+              </div>
+              <!-- Edit-in-place (owner only): swaps in for post1-view on the pencil click, same
+                   textarea/counter/button pattern as feed.html's composer (500-char cap) — not a
+                   modal, editing isn't destructive so modal-dialog.md's extra-friction reasoning
+                   doesn't apply here the way it does to delete. -->
+              <div id="post1-edit" class="hidden flex-col gap-2">
+                <textarea id="post1-textarea" maxlength="500" oninput="updatePostCounter(1)" rows="3" class="w-full resize-none bg-transparent text-base rounded-lg px-3 py-2" style="border: 1px solid var(--border); color: var(--text);">Golden hour in the Western Ghats tonight. Forgot how quiet it gets up here — no signal, no notifications, just the light doing its thing.</textarea>
+                <div class="flex items-center justify-between">
+                  <span id="post1-counter" class="text-xs" style="color: var(--muted);"></span>
+                  <div class="flex gap-2">
+                    <button type="button" onclick="cancelEditPost(1)" class="text-sm font-medium rounded-lg px-3 py-1.5" style="border: 1px solid var(--border); color: var(--text);">Cancel</button>
+                    <button type="button" onclick="saveEditPost(1)" class="font-display text-sm font-semibold rounded-lg px-3 py-1.5" style="background: var(--primary); color: var(--on-fill);">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="post1-actions" class="post-owner-actions hidden gap-1 shrink-0">
+              <button type="button" aria-label="Edit post" onclick="editPost(1)" class="p-2 rounded-full hover:bg-[var(--border)]" style="color: var(--muted);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                  <path d="M4 20l.7-3.5L15.5 5.7l2.8 2.8L7.5 19.3 4 20z" />
+                  <path d="M13.8 7.4l2.8 2.8" />
+                </svg>
+              </button>
+              <button type="button" aria-label="Delete post" onclick="document.getElementById('delete-confirm-dialog').showModal()" class="p-2 rounded-full hover:bg-[var(--border)]" style="color: var(--muted);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                  <path d="M5 7h14" />
+                  <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                  <path d="M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" />
+                  <path d="M10 11v6M14 11v6" />
+                </svg>
+              </button>
+            </div>
+          </article>
+
+          <article class="p-5 flex items-start gap-3">
+            <img src="https://i.pravatar.cc/96?img=47" alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
+            <div class="flex-1 min-w-0">
+              <div id="post2-view" class="flex flex-col gap-1.5">
+                <span class="font-mono text-xs" style="color: var(--muted);">1d</span>
+                <p class="text-base" style="color: var(--text);">
+                  Printed the Ghats set this weekend — turns out three of the "throwaway" frames
+                  were the ones worth keeping. Never trust yourself at 2am.
+                </p>
+                <div class="flex items-center gap-4 mt-1">
+                  <button type="button" id="like-btn-2" onclick="toggleLike(2)" class="inline-flex items-center gap-1.5 text-sm" style="color: var(--muted);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+                      <path d="M7 10v12" />
+                    </svg>
+                    <span id="like-count-2">6</span> likes
+                  </button>
+                  <a href="#" class="inline-flex items-center gap-1.5 text-sm hover:text-[var(--text)]" style="color: var(--muted);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                    </svg>
+                    1 comment
+                  </a>
+                </div>
+              </div>
+              <div id="post2-edit" class="hidden flex-col gap-2">
+                <textarea id="post2-textarea" maxlength="500" oninput="updatePostCounter(2)" rows="3" class="w-full resize-none bg-transparent text-base rounded-lg px-3 py-2" style="border: 1px solid var(--border); color: var(--text);">Printed the Ghats set this weekend — turns out three of the "throwaway" frames were the ones worth keeping. Never trust yourself at 2am.</textarea>
+                <div class="flex items-center justify-between">
+                  <span id="post2-counter" class="text-xs" style="color: var(--muted);"></span>
+                  <div class="flex gap-2">
+                    <button type="button" onclick="cancelEditPost(2)" class="text-sm font-medium rounded-lg px-3 py-1.5" style="border: 1px solid var(--border); color: var(--text);">Cancel</button>
+                    <button type="button" onclick="saveEditPost(2)" class="font-display text-sm font-semibold rounded-lg px-3 py-1.5" style="background: var(--primary); color: var(--on-fill);">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="post2-actions" class="post-owner-actions hidden gap-1 shrink-0">
+              <button type="button" aria-label="Edit post" onclick="editPost(2)" class="p-2 rounded-full hover:bg-[var(--border)]" style="color: var(--muted);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                  <path d="M4 20l.7-3.5L15.5 5.7l2.8 2.8L7.5 19.3 4 20z" />
+                  <path d="M13.8 7.4l2.8 2.8" />
+                </svg>
+              </button>
+              <button type="button" aria-label="Delete post" onclick="document.getElementById('delete-confirm-dialog').showModal()" class="p-2 rounded-full hover:bg-[var(--border)]" style="color: var(--muted);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                  <path d="M5 7h14" />
+                  <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                  <path d="M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" />
+                  <path d="M10 11v6M14 11v6" />
+                </svg>
+              </button>
+            </div>
+          </article>
+
+          <article class="p-5 flex items-start gap-3">
+            <img src="https://i.pravatar.cc/96?img=47" alt="" class="w-10 h-10 rounded-full object-cover shrink-0" />
+            <div class="flex-1 min-w-0">
+              <div id="post3-view" class="flex flex-col gap-1.5">
+                <span class="font-mono text-xs" style="color: var(--muted);">3d</span>
+                <p class="text-base" style="color: var(--text);">
+                  Packing list for the next leg: one camera, two lenses, way too much film, and a
+                  pair of boots that are already regretting this trip.
+                </p>
+                <div class="flex items-center gap-4 mt-1">
+                  <button type="button" id="like-btn-3" onclick="toggleLike(3)" class="inline-flex items-center gap-1.5 text-sm" style="color: var(--muted);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" />
+                      <path d="M7 10v12" />
+                    </svg>
+                    <span id="like-count-3">0</span> likes
+                  </button>
+                  <a href="#" class="inline-flex items-center gap-1.5 text-sm hover:text-[var(--text)]" style="color: var(--muted);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+                    </svg>
+                    0 comments
+                  </a>
+                </div>
+              </div>
+              <div id="post3-edit" class="hidden flex-col gap-2">
+                <textarea id="post3-textarea" maxlength="500" oninput="updatePostCounter(3)" rows="3" class="w-full resize-none bg-transparent text-base rounded-lg px-3 py-2" style="border: 1px solid var(--border); color: var(--text);">Packing list for the next leg: one camera, two lenses, way too much film, and a pair of boots that are already regretting this trip.</textarea>
+                <div class="flex items-center justify-between">
+                  <span id="post3-counter" class="text-xs" style="color: var(--muted);"></span>
+                  <div class="flex gap-2">
+                    <button type="button" onclick="cancelEditPost(3)" class="text-sm font-medium rounded-lg px-3 py-1.5" style="border: 1px solid var(--border); color: var(--text);">Cancel</button>
+                    <button type="button" onclick="saveEditPost(3)" class="font-display text-sm font-semibold rounded-lg px-3 py-1.5" style="background: var(--primary); color: var(--on-fill);">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="post3-actions" class="post-owner-actions hidden gap-1 shrink-0">
+              <button type="button" aria-label="Edit post" onclick="editPost(3)" class="p-2 rounded-full hover:bg-[var(--border)]" style="color: var(--muted);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                  <path d="M4 20l.7-3.5L15.5 5.7l2.8 2.8L7.5 19.3 4 20z" />
+                  <path d="M13.8 7.4l2.8 2.8" />
+                </svg>
+              </button>
+              <button type="button" aria-label="Delete post" onclick="document.getElementById('delete-confirm-dialog').showModal()" class="p-2 rounded-full hover:bg-[var(--border)]" style="color: var(--muted);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                  <path d="M5 7h14" />
+                  <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                  <path d="M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" />
+                  <path d="M10 11v6M14 11v6" />
+                </svg>
+              </button>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- Empty state, own profile — empty-states.md's exact row: i-compose, "Nothing posted
+             yet", CTA "Write your first post" → feed.html (no separate compose page/route; the
+             composer already lives inline at the top of Feed, per that mockup). Doors into
+             god-moments.md #3, "This Is Mine." Hidden by default. -->
+        <div id="posts-empty-own" class="hidden flex-col items-center text-center gap-2 py-20">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10" style="color: var(--muted);">
+            <rect x="4" y="4" width="16" height="16" rx="3" />
+            <path d="M12 9v6M9 12h6" />
+          </svg>
+          <p class="font-display text-lg font-semibold">Nothing posted yet</p>
+          <p class="text-sm" style="color: var(--muted);">Whatever's on your mind, this is the place for it.</p>
+          <a
+            href="feed.html"
+            class="font-display text-sm font-semibold rounded-lg px-4 py-2 mt-2"
+            style="background: var(--primary); color: var(--on-fill);"
+          >
+            Write your first post
+          </a>
+        </div>
+
+        <!-- Empty state, someone else's profile — deliberately smaller per empty-states.md: no
+             CTA (there's nothing the viewer can do about it), just i-profile and "No posts yet."
+             Hidden by default. -->
+        <div id="posts-empty-other" class="hidden flex-col items-center text-center gap-2 py-14">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8" style="color: var(--muted);">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
+          </svg>
+          <p class="text-sm" style="color: var(--muted);">No posts yet.</p>
+        </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Delete-confirm dialog (modal-dialog.md): native <dialog>, flat surface panel + dimmed
+       --text scrim, danger-fill confirm, decided copy verbatim ("Delete this post? This can't be
+       undone."). Cancel is neutral/outline. Reused for every post's delete button above. -->
+  <dialog id="delete-confirm-dialog" class="w-full max-w-sm">
+    <div class="p-6 flex flex-col gap-4">
+      <div>
+        <p class="font-display text-lg font-semibold">Delete this post?</p>
+        <p class="text-sm mt-1" style="color: var(--muted);">This can't be undone.</p>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          onclick="document.getElementById('delete-confirm-dialog').close()"
+          class="text-sm font-medium rounded-lg px-4 py-2"
+          style="border: 1px solid var(--border); color: var(--text);"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onclick="document.getElementById('delete-confirm-dialog').close()"
+          class="font-display text-sm font-semibold rounded-lg px-4 py-2"
+          style="background: var(--danger); color: var(--on-fill);"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Mockup-only state logic — not app UI. viewState: 0 = not following, 1 = following,
+       2 = own profile. A logged-out guest (header-logged-out visible) overrides viewState for the
+       Follow region and post-actions: neither ever renders for a guest, regardless of what
+       viewState is set to, matching "hidden ... for logged-out or self view." -->
+  <script>
+    let viewState = 0;
+    let emptyMode = false;
+    const nextViewLabel = ['Preview: already following', 'Preview: your own profile', 'Back to viewing a stranger'];
+
+    // friend-requests-preview.md — independent of viewState above, same reasoning as its own
+    // header comment: a second, opt-in relationship layered on top of Follow, not folded into it.
+    // 0 = not connected, 1 = request sent (by viewer), 2 = request received (from this profile's
+    // owner), 3 = friends (accepted).
+    let friendState = 0;
+    const nextFriendLabel = ['Preview: request sent', 'Preview: request received', 'Preview: already friends', 'Back to not connected'];
+
+    function isGuest() {
+      return !document.getElementById('header-logged-out').classList.contains('hidden');
+    }
+
+    function toggleLoggedIn() {
+      document.getElementById('header-logged-out').classList.toggle('hidden');
+      document.getElementById('rail-logged-in').classList.toggle('hidden');
+      document.getElementById('rail-logged-in').classList.toggle('flex');
+      const btn = document.getElementById('toggle-login-btn');
+      btn.textContent = btn.textContent.startsWith('Preview') ? 'Back to logged-out view' : 'Preview logged-in view';
+      render();
+    }
+
+    function cycleViewState() {
+      viewState = (viewState + 1) % 3;
+      document.getElementById('toggle-view-btn').textContent = nextViewLabel[viewState];
+      render();
+    }
+
+    // Cycles the toolbar preview through all 4 states, including "received" — unreachable via the
+    // in-page buttons themselves, since a viewer can't trigger someone else having requested them.
+    function cycleFriendState() {
+      friendState = (friendState + 1) % 4;
+      render();
+    }
+
+    // Real in-page mechanics (Add friend / cancel / Accept / Decline), same spirit as editPost
+    // below — not a session-state toggle, an actual click outcome. Also keeps the toolbar label in
+    // sync via render(), regardless of which path changed friendState.
+    function setFriendState(next) {
+      friendState = next;
+      render();
+    }
+
+    function toggleEmpty() {
+      emptyMode = !emptyMode;
+      const btn = document.getElementById('toggle-empty-btn');
+      btn.textContent = emptyMode ? 'Back to posts' : 'Preview empty state';
+      render();
+    }
+
+    function render() {
+      const guest = isGuest();
+      const following = !guest && viewState === 1;
+      const own = !guest && viewState === 2;
+      const notFollowing = !guest && viewState === 0;
+
+      document.getElementById('toggle-view-btn').classList.toggle('hidden', guest);
+
+      document.getElementById('follow-btn-not-following').classList.toggle('hidden', !notFollowing);
+      document.getElementById('follow-btn-following').classList.toggle('hidden', !following);
+      document.getElementById('edit-profile-btn').classList.toggle('hidden', !own);
+      document.getElementById('edit-profile-btn').classList.toggle('flex', own);
+
+      // Friend-request region — hidden whenever Follow's own region would be inapplicable too
+      // (guest or own profile), independent friendState otherwise (friend-requests-preview.md).
+      const showFriendControls = !guest && !own;
+      document.getElementById('toggle-friend-btn').classList.toggle('hidden', !showFriendControls);
+      document.getElementById('toggle-friend-btn').textContent = nextFriendLabel[friendState];
+
+      document.getElementById('friend-btn-none').classList.toggle('hidden', !(showFriendControls && friendState === 0));
+      document.getElementById('friend-btn-sent').classList.toggle('hidden', !(showFriendControls && friendState === 1));
+      const showReceived = showFriendControls && friendState === 2;
+      document.getElementById('friend-btn-received').classList.toggle('hidden', !showReceived);
+      document.getElementById('friend-btn-received').classList.toggle('flex', showReceived);
+      document.getElementById('friend-btn-friends').classList.toggle('hidden', !(showFriendControls && friendState === 3));
+
+      document.querySelectorAll('.post-owner-actions').forEach((el) => {
+        el.classList.toggle('hidden', !own);
+        el.classList.toggle('flex', own);
+      });
+
+      document.getElementById('posts-list').classList.toggle('hidden', emptyMode);
+
+      const showEmptyOwn = emptyMode && own;
+      const showEmptyOther = emptyMode && !own;
+      document.getElementById('posts-empty-own').classList.toggle('hidden', !showEmptyOwn);
+      document.getElementById('posts-empty-own').classList.toggle('flex', showEmptyOwn);
+      document.getElementById('posts-empty-other').classList.toggle('hidden', !showEmptyOther);
+      document.getElementById('posts-empty-other').classList.toggle('flex', showEmptyOther);
+    }
+
+    // Post edit-in-place (owner only, mockup-only mechanics — no real persistence, same as every
+    // other button on this page). editPost swaps a post's view for its edit form and force-hides
+    // that post's own action icons (Save/Cancel replace them functionally); cancel/save both just
+    // restore the view and hand action-icon visibility back to render()'s own-profile check.
+    function editPost(n) {
+      document.getElementById(`post${n}-view`).classList.add('hidden');
+      document.getElementById(`post${n}-edit`).classList.remove('hidden');
+      document.getElementById(`post${n}-edit`).classList.add('flex');
+      document.getElementById(`post${n}-actions`).classList.add('hidden');
+      document.getElementById(`post${n}-actions`).classList.remove('flex');
+      document.getElementById(`post${n}-textarea`).focus();
+    }
+    function cancelEditPost(n) {
+      document.getElementById(`post${n}-view`).classList.remove('hidden');
+      document.getElementById(`post${n}-edit`).classList.add('hidden');
+      document.getElementById(`post${n}-edit`).classList.remove('flex');
+      render();
+    }
+    function saveEditPost(n) {
+      // No real save target in a static mockup — the body text just stays as typed and the card
+      // drops back to view mode, standing in for "changes persisted."
+      cancelEditPost(n);
+    }
+    function updatePostCounter(n) {
+      const len = document.getElementById(`post${n}-textarea`).value.length;
+      document.getElementById(`post${n}-counter`).textContent = `${len}/500`;
+    }
+    updatePostCounter(1);
+    updatePostCounter(2);
+    updatePostCounter(3);
+
+    // PHASE 2 PREVIEW addition (likes-preview.md): mockup-only like toggle, same pattern as
+    // feed.html's. Post 1 carries the same liked/count state as feed.html's Post 1 since it's
+    // the same post reused byte-for-byte.
+    const likeState = {
+      1: { liked: true,  count: 12 },
+      2: { liked: false, count: 6 },
+      3: { liked: false, count: 0 }
+    };
+
+    function renderLike(id) {
+      const state = likeState[id];
+      const btn = document.getElementById(`like-btn-${id}`);
+      const icon = btn.querySelector('svg');
+      document.getElementById(`like-count-${id}`).textContent = state.count;
+      btn.style.color = state.liked ? 'var(--secondary)' : 'var(--muted)';
+      icon.setAttribute('fill', state.liked ? 'currentColor' : 'none');
+    }
+
+    function toggleLike(id) {
+      const state = likeState[id];
+      state.liked = !state.liked;
+      state.count += state.liked ? 1 : -1;
+      renderLike(id);
+      const icon = document.getElementById(`like-btn-${id}`).querySelector('svg');
+      icon.classList.remove('like-pop');
+      void icon.offsetWidth; // restart the animation if clicked again quickly
+      icon.classList.add('like-pop');
+    }
+
+    Object.keys(likeState).forEach((id) => renderLike(Number(id)));
+
+    render();
+  </script>
+
+</body>
+</html>
