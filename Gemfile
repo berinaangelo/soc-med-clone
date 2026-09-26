@@ -4,8 +4,8 @@ source "https://rubygems.org"
 gem "rails", "~> 8.1.3", ">= 8.1.3.1"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
-# Use sqlite3 as the database for Active Record
-gem "sqlite3", ">= 2.1"
+# Use mysql2 as the database for Active Record (tech-stack.md: MySQL, not sqlite3/Postgres)
+gem "mysql2", "~> 0.5"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
@@ -16,6 +16,9 @@ gem "turbo-rails"
 gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
+# Tailwind CSS, via the official gem rather than a CDN tag, for production content-aware purging
+# (tech-stack.md) [https://github.com/rails/tailwindcss-rails]
+gem "tailwindcss-rails"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
@@ -57,6 +60,10 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Preview Devise's recoverable-module reset-password email in a browser tab instead of actually
+  # sending anything — zero infra, zero cost (devise-modules.md) [https://github.com/ryanb/letter_opener]
+  gem "letter_opener"
 end
 
 group :test do
@@ -64,3 +71,5 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "devise", "~> 5.0"
