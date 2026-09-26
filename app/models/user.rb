@@ -7,4 +7,6 @@ class User < ApplicationRecord
   # Profile fields (data-model-schema.md, profile-editing.md) — name required, bio and
   # profile_picture (a pasted URL, no Active Storage for MVP per mvp-scope.md cut #3) optional.
   validates :name, presence: true
+
+  has_many :posts, dependent: :destroy
 end
