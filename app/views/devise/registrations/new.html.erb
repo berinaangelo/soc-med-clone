@@ -1,0 +1,52 @@
+<%# Real sign-up screen, matching kos/ux/pages/signup.html — see that file's god-moment comment:
+    supporting infrastructure, kept to 4 minimal fields (name, email, password, confirm) on
+    purpose. Uses the app's actual Tailwind theme utilities (bg-primary, text-muted, etc. — see
+    app/assets/tailwind/application.css) rather than the mockup's inline var(--token) styles,
+    which were only a CDN-Tailwind workaround. %>
+<main class="min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-sm">
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "rounded-2xl p-8 bg-surface border border-border", novalidate: true }) do |f| %>
+      <h1 class="font-display text-2xl font-semibold mb-1">Sign up</h1>
+      <p class="text-sm mb-6 text-muted">Create your account to get started.</p>
+
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-1.5">
+          <%= f.label :name, class: "text-sm font-medium" %>
+          <%= f.text_field :name, autocomplete: "name", required: true,
+              class: "rounded-lg px-3 py-2 text-base bg-transparent border border-border text-text" %>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <%= f.label :email, class: "text-sm font-medium" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true,
+              class: "rounded-lg px-3 py-2 text-base bg-transparent border border-border text-text" %>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <%= f.label :password, class: "text-sm font-medium" %>
+          <%= f.password_field :password, autocomplete: "new-password", required: true,
+              class: "rounded-lg px-3 py-2 text-base bg-transparent border border-border text-text" %>
+          <% if @minimum_password_length %>
+            <span class="text-xs text-muted">At least <%= @minimum_password_length %> characters.</span>
+          <% end %>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <%= f.label :password_confirmation, class: "text-sm font-medium" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true,
+              class: "rounded-lg px-3 py-2 text-base bg-transparent border border-border text-text" %>
+        </div>
+
+        <%= f.submit "Sign up",
+            class: "font-display text-sm font-semibold rounded-lg py-2.5 mt-2 bg-primary text-on-fill cursor-pointer" %>
+      </div>
+    <% end %>
+
+    <p class="text-center text-sm mt-6 text-muted">
+      Already have an account?
+      <%= link_to "Log in", new_session_path(resource_name), class: "font-medium text-primary" %>
+    </p>
+  </div>
+</main>

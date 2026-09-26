@@ -1,0 +1,19 @@
+<%# Danger-text convention (color-scheme.md's --danger token, real utility: text-danger) shared
+    across the auth-chain mockups' inline field errors — this is Devise's own multi-error summary
+    block, no per-screen mockup shows this exact shape, so styled minimally rather than invented
+    from scratch. %>
+<% if resource.errors.any? %>
+  <div id="error_explanation" class="rounded-lg p-3 mb-5 border border-danger" data-turbo-temporary>
+    <p class="text-sm font-medium text-danger">
+      <%= I18n.t("errors.messages.not_saved",
+                 count: resource.errors.count,
+                 resource: resource.class.model_name.human.downcase)
+       %>
+    </p>
+    <ul class="mt-1 text-sm text-danger list-disc list-inside">
+      <% resource.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
